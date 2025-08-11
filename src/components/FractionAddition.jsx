@@ -63,14 +63,14 @@ const FractionAddition = () => {
                             onChange={(e) => handleNumeratorChange(0, e.target.value)}
                             className="text-center"
                             error={errors[0]}
-                            focusColor="#008545"
+                            focusColor="#5750E3"
                         />
                         <hr className="w-full border-t-2 border-red-500 my-1" />
                         <Input
                             value={denominators[0]}
                             onChange={(e) => handleDenominatorChange(0, e.target.value)}
                             className="text-center"
-                            focusColor="#008545"
+                            focusColor="#5750E3"
                         />
                     </div>
                     <div className="text-4xl mt-10">+</div>
@@ -81,14 +81,14 @@ const FractionAddition = () => {
                             onChange={(e) => handleNumeratorChange(1, e.target.value)}
                             className="text-center"
                             error={errors[1]}
-                            focusColor="#008545"
+                            focusColor="#5750E3"
                         />
                         <hr className="w-full border-t-2 border-blue-500 my-1" />
                         <Input
                             value={denominators[1]}
                             onChange={(e) => handleDenominatorChange(1, e.target.value)}
                             className="text-center"
-                            focusColor="#008545"
+                            focusColor="#5750E3"
                         />
                     </div>
                 </div>
