@@ -3,7 +3,9 @@ import { Container } from './ui/reused-ui/Container';
 import { Input } from './ui/reused-ui/Input';
 import { FlexiText } from './ui/reused-ui/FlexiText';
 import { GlowButton } from './ui/reused-ui/GlowButton';
+import { PieChart, Pie, Cell } from 'recharts';
 import FlexiWave from '../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
+import FlexiTeacher from '../assets/All Flexi Poses/SVG/Flexi_Teacher.svg';
 import './ui/reused-animations/width.css';
 
 
@@ -18,6 +20,10 @@ const FractionAddition = () => {
     const [showAnimatedLines, setShowAnimatedLines] = useState(false);
     const [translateFractions, setTranslateFractions] = useState(false);
     const [hidePlusSign, setHidePlusSign] = useState(false);
+    const [showPieCharts, setShowPieCharts] = useState(false);
+    const [showSecondFlexi, setShowSecondFlexi] = useState(false);
+    const [fadeFirstFlexi, setFadeFirstFlexi] = useState(false);
+    const [showNextButton, setShowNextButton] = useState(false);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -49,6 +55,10 @@ const FractionAddition = () => {
         setShowAnimatedLines(false);
         setTranslateFractions(false);
         setHidePlusSign(false);
+        setShowPieCharts(false);
+        setShowSecondFlexi(false);
+        setFadeFirstFlexi(false);
+        setShowNextButton(false);
     };
 
     const handleValueChange = (setter, values, index, value) => {
@@ -106,6 +116,18 @@ const FractionAddition = () => {
                         setTimeout(() => {
                             setTranslateFractions(true);
                             setHidePlusSign(true);
+                            setTimeout(() => {
+                                setShowPieCharts(true);
+                                setTimeout(() => {
+                                    setFadeFirstFlexi(true);
+                                    setTimeout(() => {
+                                        setShowSecondFlexi(true);
+                                        setTimeout(() => {
+                                            setShowNextButton(true);
+                                        }, 300);
+                                    }, 500);
+                                }, 1800);
+                            }, 500);
                         }, 500);
                     }, 300);
                 }, 500);
@@ -176,9 +198,60 @@ const FractionAddition = () => {
                     </div>
                 </div>
             </div>
-            <FlexiText flexiImage={FlexiWave}>
-                Enter two proper fractions to see how to add them step by step
-            </FlexiText>
+            {showPieCharts && (
+                <div className="flex justify-center items-center mt-2 space-x-32 continue-animation">
+                    <div className="w-28 h-28" style={{ transform: 'translateX(-8px)' }}>
+                        <PieChart width={112} height={112}>
+                            <Pie
+                                data={Array.from({ length: parseInt(denominators[0]) }).map(() => ({ value: 1 }))}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                fill="#8884d8"
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                            >
+                                {
+                                    Array.from({ length: parseInt(denominators[0]) }).map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={index < parseInt(numerators[0]) ? '#EF4444' : '#FFFFFF'} stroke="#000" strokeWidth={1} />
+                                    ))
+                                }
+                            </Pie>
+                        </PieChart>
+                    </div>
+                    <div className="w-28 h-28" style={{ transform: 'translateX(8px)' }}>
+                        <PieChart width={112} height={112}>
+                            <Pie
+                                data={Array.from({ length: parseInt(denominators[1]) }).map(() => ({ value: 1 }))}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                fill="#8884d8"
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                            >
+                                {
+                                    Array.from({ length: parseInt(denominators[1]) }).map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={index < parseInt(numerators[1]) ? '#3B82F6' : '#FFFFFF'} stroke="#000" strokeWidth={1} />
+                                    ))
+                                }
+                            </Pie>
+                        </PieChart>
+                    </div>
+                </div>
+            )}
+            {!showSecondFlexi && (
+                <FlexiText flexiImage={FlexiWave} className={`${fadeFirstFlexi ? 'fade-out' : ''}`}>
+                    Enter two proper fractions to see how to add them step by step
+                </FlexiText>
+            )}
+            {showSecondFlexi && (
+                <FlexiText flexiImage={FlexiTeacher} className="fade-in-up-animation">
+                    Nice, now we find a common denominator
+                </FlexiText>
+            )}
             {!showFractions && (
                 <div className={`absolute bottom-0 right-0 z-10 p-4 ${isButtonShrinking ? 'shrink-out-animation' : ''}`}>
                     <GlowButton onClick={handleShowFractions} bgColor="#E8EDF5" autoShrinkOnClick={false}>
@@ -186,8 +259,15 @@ const FractionAddition = () => {
                     </GlowButton>
                 </div>
             )}
+            {showNextButton && (
+                <div className="absolute bottom-0 right-0 z-10 p-4 fade-in-up-animation">
+                    <GlowButton onClick={() => {}} bgColor="#E8EDF5" autoShrinkOnClick={false}>
+                        <p className="whitespace-nowrap">Find Common Denominator</p>
+                    </GlowButton>
+                </div>
+            )}
         </Container>
-    )
+)
 };
 
 
