@@ -39,7 +39,7 @@ export function Container({
 		<div className={containerClasses} {...props}>
 			<div className="p-4">
 				<div className="flex justify-between items-center mb-4">
-					<h2 className="text-[#5750E3] text-sm font-medium select-none">{text}</h2>
+					<h2 className="text-[#008545] text-sm font-bold select-none">{text}</h2>
 					{showResetButton && (
 						<button 
 							className="text-sm px-3 py-1 rounded border transition-colors text-gray-500 hover:text-gray-700 border-gray-300 hover:border-gray-400"
@@ -51,7 +51,7 @@ export function Container({
 					)}
 				</div>
 				<div>
-					<div className="w-full bg-white border border-[#5750E3]/30 rounded-md relative overflow-hidden" style={{ minHeight: '420px', height: 'auto' }}>
+					<div className="w-full bg-[#E8EDF5] border border-[#B3DAC7] rounded-md relative overflow-hidden" style={{ minHeight: '420px', height: 'auto' }}>
 						{children}
 					</div>
 				</div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import FlexiWave from '../../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
+import FlexiWave from '../../../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
 import '../reused-animations/fade.css';
 
 export function FlexiText({ 
