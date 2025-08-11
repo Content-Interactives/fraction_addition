@@ -11,6 +11,7 @@ export function Input({
     success = false,
     defaultValue = '',
     focusColor = '#5750E3',
+    containerClassName = '',
     ...props 
 }) {
     // Initialize internal state with defaultValue
@@ -68,7 +69,7 @@ export function Input({
     };
 
     return (
-        <div className="relative">
+        <div className={`relative ${containerClassName}`}>
             <style>{`
                 input:focus {
                     --tw-ring-color: ${focusColor} !important;
