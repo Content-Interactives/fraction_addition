@@ -26,6 +26,16 @@ const FractionAddition = () => {
     const [fadeFirstFlexi, setFadeFirstFlexi] = useState(false);
     const [hideFirstFlexi, setHideFirstFlexi] = useState(false);
     const [showNextButton, setShowNextButton] = useState(false);
+    const [fadeNextButton, setFadeNextButton] = useState(false);
+    const [hideNextButton, setHideNextButton] = useState(false);
+    const [fadeSecondFlexi, setFadeSecondFlexi] = useState(false);
+    const [hideSecondFlexi, setHideSecondFlexi] = useState(false);
+    const [showCommonFlexi, setShowCommonFlexi] = useState(false);
+    const [commonDenominator, setCommonDenominator] = useState(null);
+    const [showFirstMultipliers, setShowFirstMultipliers] = useState(false);
+    const [firstMultiplier, setFirstMultiplier] = useState(null);
+    const [showSecondMultipliers, setShowSecondMultipliers] = useState(false);
+    const [secondMultiplier, setSecondMultiplier] = useState(null);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -62,6 +72,70 @@ const FractionAddition = () => {
         setFadeFirstFlexi(false);
         setHideFirstFlexi(false);
         setShowNextButton(false);
+        setFadeNextButton(false);
+        setHideNextButton(false);
+        setFadeSecondFlexi(false);
+        setHideSecondFlexi(false);
+        setShowCommonFlexi(false);
+        setCommonDenominator(null);
+        setShowFirstMultipliers(false);
+        setFirstMultiplier(null);
+        setShowSecondMultipliers(false);
+        setSecondMultiplier(null);
+    };
+
+    // Show multiplier numbers for BOTH fractions shortly after the common denominator bubble appears
+    useEffect(() => {
+        if (!showCommonFlexi) return;
+        const den1 = parseInt(denominators[0], 10);
+        const den2 = parseInt(denominators[1], 10);
+        if (!den1 || !den2) return;
+        const lcd = leastCommonMultiple(den1, den2);
+        if (!lcd) return;
+        const factor1 = lcd / den1;
+        const factor2 = lcd / den2;
+        const timer = setTimeout(() => {
+            setFirstMultiplier(factor1);
+            setShowFirstMultipliers(true);
+            setSecondMultiplier(factor2);
+            setShowSecondMultipliers(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showCommonFlexi, denominators]);
+
+    const greatestCommonDivisor = (a, b) => {
+        let x = Math.abs(a);
+        let y = Math.abs(b);
+        while (y !== 0) {
+            const temp = y;
+            y = x % y;
+            x = temp;
+        }
+        return x || 1;
+    };
+
+    const leastCommonMultiple = (a, b) => {
+        if (a === 0 || b === 0) return 0;
+        return Math.abs(a * b) / greatestCommonDivisor(a, b);
+    };
+
+    const handleFindCommonDenominator = () => {
+        const den1 = parseInt(denominators[0], 10);
+        const den2 = parseInt(denominators[1], 10);
+        const lcd = leastCommonMultiple(den1, den2);
+        setCommonDenominator(lcd);
+
+        setFadeSecondFlexi(true);
+        // Fade out the Next button as well
+        setFadeNextButton(true);
+        setTimeout(() => {
+            setHideNextButton(true);
+        }, 500);
+        setTimeout(() => {
+            setHideSecondFlexi(true);
+            setShowCommonFlexi(true);
+        }, 500);
     };
 
     const handleValueChange = (setter, values, index, value) => {
@@ -160,6 +234,11 @@ const FractionAddition = () => {
                                 focusColor="#5750E3"
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
+                            {showFractions && showFirstMultipliers && firstMultiplier !== null && (
+                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ right: '-18px' }}>
+                                    x{firstMultiplier}
+                                </div>
+                            )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{numerators[0]}</p>}
                         </div>
                         <hr className={`w-full border-t-2 border-red-500 my-1 ${showAnimatedLines ? 'shrink-width-animation' : ''}`} />
@@ -172,6 +251,11 @@ const FractionAddition = () => {
                                 focusColor="#5750E3"
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
+                            {showFractions && showFirstMultipliers && firstMultiplier !== null && (
+                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ right: '-18px' }}>
+                                    x{firstMultiplier}
+                                </div>
+                            )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{denominators[0]}</p>}
                         </div>
                     </div>
@@ -187,6 +271,11 @@ const FractionAddition = () => {
                                 focusColor="#5750E3"
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
+                            {showFractions && showSecondMultipliers && secondMultiplier !== null && (
+                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ left: '-18px' }}>
+                                    {secondMultiplier}x
+                                </div>
+                            )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{numerators[1]}</p>}
                         </div>
                         <hr className={`w-full border-t-2 border-blue-500 my-1 ${showAnimatedLines ? 'shrink-width-animation' : ''}`} />
@@ -199,6 +288,11 @@ const FractionAddition = () => {
                                 focusColor="#5750E3"
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
+                            {showFractions && showSecondMultipliers && secondMultiplier !== null && (
+                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ left: '-18px' }}>
+                                    {secondMultiplier}x
+                                </div>
+                            )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{denominators[1]}</p>}
                         </div>
                     </div>
@@ -253,9 +347,14 @@ const FractionAddition = () => {
                     Enter two proper fractions to see how to add them step by step
                 </FlexiText>
             )}
-            {showSecondFlexi && (
-                <FlexiText flexiImage={FlexiTeacher} className="fade-in-up-animation">
+            {showSecondFlexi && !hideSecondFlexi && (
+                <FlexiText flexiImage={FlexiTeacher} className={`${fadeSecondFlexi ? 'fade-out-up-animation' : 'fade-in-up-animation'}`}>
                     Nice, now we find a common denominator
+                </FlexiText>
+            )}
+            {showCommonFlexi && (
+                <FlexiText flexiImage={FlexiTeacher} className="fade-in-up-animation">
+                    The common denominator for <span className="text-red-500 font-bold">{denominators[0]}</span> and <span className="text-blue-500 font-bold">{denominators[1]}</span> is <span className="text-purple-600 font-bold">{commonDenominator}</span>. Now let's adjust the fractions to use our common denominator.
                 </FlexiText>
             )}
             {!showFractions && (
@@ -265,9 +364,9 @@ const FractionAddition = () => {
                     </GlowButton>
                 </div>
             )}
-            {showNextButton && (
-                <div className="absolute bottom-0 right-0 z-10 p-4 fade-in-up-animation">
-                    <GlowButton onClick={() => {}} bgColor="#E8EDF5" autoShrinkOnClick={false}>
+            {showNextButton && !hideNextButton && (
+                <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeNextButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
+                    <GlowButton onClick={handleFindCommonDenominator} bgColor="#E8EDF5" autoShrinkOnClick={false}>
                         <p className="whitespace-nowrap">Find Common Denominator</p>
                     </GlowButton>
                 </div>
