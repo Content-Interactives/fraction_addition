@@ -7,6 +7,7 @@ import { PieChart, Pie, Cell } from 'recharts';
 import FlexiWave from '../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
 import FlexiTeacher from '../assets/All Flexi Poses/SVG/Flexi_Teacher.svg';
 import './ui/reused-animations/width.css';
+import './ui/reused-animations/fade.css';
 
 
 const FractionAddition = () => {
@@ -23,6 +24,7 @@ const FractionAddition = () => {
     const [showPieCharts, setShowPieCharts] = useState(false);
     const [showSecondFlexi, setShowSecondFlexi] = useState(false);
     const [fadeFirstFlexi, setFadeFirstFlexi] = useState(false);
+    const [hideFirstFlexi, setHideFirstFlexi] = useState(false);
     const [showNextButton, setShowNextButton] = useState(false);
 
     useEffect(() => {
@@ -58,6 +60,7 @@ const FractionAddition = () => {
         setShowPieCharts(false);
         setShowSecondFlexi(false);
         setFadeFirstFlexi(false);
+        setHideFirstFlexi(false);
         setShowNextButton(false);
     };
 
@@ -119,14 +122,17 @@ const FractionAddition = () => {
                             setTimeout(() => {
                                 setShowPieCharts(true);
                                 setTimeout(() => {
+                                    // Start fading out first Flexi
                                     setFadeFirstFlexi(true);
                                     setTimeout(() => {
+                                        // After fade-out completes, unmount first Flexi and show second
+                                        setHideFirstFlexi(true);
                                         setShowSecondFlexi(true);
                                         setTimeout(() => {
                                             setShowNextButton(true);
                                         }, 300);
                                     }, 500);
-                                }, 1800);
+                                }, 2200);
                             }, 500);
                         }, 500);
                     }, 300);
@@ -242,8 +248,8 @@ const FractionAddition = () => {
                     </div>
                 </div>
             )}
-            {!showSecondFlexi && (
-                <FlexiText flexiImage={FlexiWave} className={`${fadeFirstFlexi ? 'fade-out' : ''}`}>
+            {!hideFirstFlexi && (
+                <FlexiText flexiImage={FlexiWave} className={`${fadeFirstFlexi ? 'fade-out-up-animation' : ''}`}>
                     Enter two proper fractions to see how to add them step by step
                 </FlexiText>
             )}
