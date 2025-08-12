@@ -28,6 +28,9 @@ const FractionAddition = () => {
     const [showNextButton, setShowNextButton] = useState(false);
     const [fadeNextButton, setFadeNextButton] = useState(false);
     const [hideNextButton, setHideNextButton] = useState(false);
+    const [showAdjustButton, setShowAdjustButton] = useState(false);
+    const [fadeAdjustButton, setFadeAdjustButton] = useState(false);
+    const [hideAdjustButton, setHideAdjustButton] = useState(false);
     const [fadeSecondFlexi, setFadeSecondFlexi] = useState(false);
     const [hideSecondFlexi, setHideSecondFlexi] = useState(false);
     const [showCommonFlexi, setShowCommonFlexi] = useState(false);
@@ -82,27 +85,38 @@ const FractionAddition = () => {
         setFirstMultiplier(null);
         setShowSecondMultipliers(false);
         setSecondMultiplier(null);
+        setShowAdjustButton(false);
+        setFadeAdjustButton(false);
+        setHideAdjustButton(false);
     };
 
-    // Show multiplier numbers for BOTH fractions shortly after the common denominator bubble appears
+    // After common denominator bubble appears, fade in the Adjust Fractions button
     useEffect(() => {
         if (!showCommonFlexi) return;
-        const den1 = parseInt(denominators[0], 10);
-        const den2 = parseInt(denominators[1], 10);
-        if (!den1 || !den2) return;
-        const lcd = leastCommonMultiple(den1, den2);
-        if (!lcd) return;
-        const factor1 = lcd / den1;
-        const factor2 = lcd / den2;
         const timer = setTimeout(() => {
-            setFirstMultiplier(factor1);
-            setShowFirstMultipliers(true);
-            setSecondMultiplier(factor2);
-            setShowSecondMultipliers(true);
-        }, 1000);
+            setShowAdjustButton(true);
+        }, 300);
         return () => clearTimeout(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showCommonFlexi, denominators]);
+    }, [showCommonFlexi]);
+
+    const handleAdjustFractions = () => {
+        // Start fading out the Adjust Fractions button
+        setFadeAdjustButton(true);
+        setTimeout(() => {
+            setHideAdjustButton(true);
+            // After the button finishes fading out, compute and show multipliers
+            const den1 = parseInt(denominators[0], 10);
+            const den2 = parseInt(denominators[1], 10);
+            const lcd = commonDenominator || leastCommonMultiple(den1, den2);
+            if (!den1 || !den2 || !lcd) return;
+            const factor1 = lcd / den1;
+            const factor2 = lcd / den2;
+            setFirstMultiplier(factor1);
+            setSecondMultiplier(factor2);
+            setShowFirstMultipliers(true);
+            setShowSecondMultipliers(true);
+        }, 500);
+    };
 
     const greatestCommonDivisor = (a, b) => {
         let x = Math.abs(a);
@@ -356,6 +370,13 @@ const FractionAddition = () => {
                 <FlexiText flexiImage={FlexiTeacher} className="fade-in-up-animation">
                     The common denominator for <span className="text-red-500 font-bold">{denominators[0]}</span> and <span className="text-blue-500 font-bold">{denominators[1]}</span> is <span className="text-purple-600 font-bold">{commonDenominator}</span>. Now let's adjust the fractions to use our common denominator.
                 </FlexiText>
+            )}
+            {showAdjustButton && !hideAdjustButton && (
+                <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeAdjustButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
+                    <GlowButton onClick={handleAdjustFractions} bgColor="#E8EDF5" autoShrinkOnClick={false}>
+                        <p className="whitespace-nowrap">Adjust Fractions</p>
+                    </GlowButton>
+                </div>
             )}
             {!showFractions && (
                 <div className={`absolute bottom-0 right-0 z-10 p-4 ${isButtonShrinking ? 'shrink-out-animation' : ''}`}>
