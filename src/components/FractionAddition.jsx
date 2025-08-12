@@ -65,6 +65,9 @@ const FractionAddition = () => {
     // multipliers remain visible for now; keep state but unused
     const [fadeOutSecondMultiplierLabels, setFadeOutSecondMultiplierLabels] = useState(false);
     const [hideSecondMultiplierLabels, setHideSecondMultiplierLabels] = useState(false);
+    // First pie re-slice sequence controls
+    const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
+    const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -138,6 +141,8 @@ const FractionAddition = () => {
         setSecondProductDenominator(null);
         setFadeOutSecondMultiplierLabels(false);
         setHideSecondMultiplierLabels(false);
+        setFirstPieHideSliceLines(false);
+        setFirstPieUseCommonDenominator(false);
     };
 
     // After common denominator bubble appears, fade in the Adjust Fractions button
@@ -247,6 +252,28 @@ const FractionAddition = () => {
             setShowCommonFlexi(true);
         }, 500);
     };
+
+    // After second products appear, run first pie re-slice sequence: hide lines, then switch to LCD slice count
+    useEffect(() => {
+        if (!showSecondProducts) return;
+        if (!commonDenominator) return;
+        const delayHide = setTimeout(() => {
+            // 1) Fade slice lines out
+            setFirstPieHideSliceLines(true);
+            const delayReslice = setTimeout(() => {
+                // 2) Switch to LCD slice count while still hidden so new slices mount invisible
+                setFirstPieUseCommonDenominator(true);
+                const delayFadeIn = setTimeout(() => {
+                    // 3) Then fade the new slice lines in
+                    setFirstPieHideSliceLines(false);
+                }, 50);
+                return () => clearTimeout(delayFadeIn);
+            }, 300);
+            return () => clearTimeout(delayReslice);
+        }, 1000);
+        return () => clearTimeout(delayHide);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showSecondProducts, commonDenominator]);
 
     const handleValueChange = (setter, values, index, value) => {
         let numericValue = value.replace(/[^0-9]/g, '');
@@ -462,21 +489,59 @@ const FractionAddition = () => {
                 <div className="flex justify-center items-center mt-2 space-x-32 continue-animation">
                     <div className="w-28 h-28" style={{ transform: 'translateX(-8px)' }}>
                         <PieChart width={112} height={112}>
+                            {/* Fill layer: keeps filled proportion static */}
                             <Pie
-                                data={Array.from({ length: parseInt(denominators[0]) }).map(() => ({ value: 1 }))}
+                                data={(() => {
+                                    const den0 = parseInt(denominators[0] || 0);
+                                    const num0 = parseInt(numerators[0] || 0);
+                                    const safeDen = den0 > 0 ? den0 : 1;
+                                    const safeNum = Math.min(num0, safeDen);
+                                    return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
+                                })()}
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={50}
-                                fill="#8884d8"
                                 dataKey="value"
                                 startAngle={90}
                                 endAngle={450}
+                                stroke="none"
                             >
-                                {
-                                    Array.from({ length: parseInt(denominators[0]) }).map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={index < parseInt(numerators[0]) ? '#EF4444' : '#FFFFFF'} stroke="#000" strokeWidth={1} />
-                                    ))
-                                }
+                                <Cell fill="#EF4444" />
+                                <Cell fill="#FFFFFF" />
+                            </Pie>
+                            {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
+                            <Pie
+                                data={Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map(() => ({ value: 1 }))}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                                fill="transparent"
+                            >
+                                {Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map((_, index) => (
+                                    <Cell
+                                        key={`outline-cell-${index}`}
+                                        fill="transparent"
+                                        stroke="#000"
+                                        strokeWidth={1}
+                                        style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: firstPieHideSliceLines ? 0 : 1 }}
+                                    />
+                                ))}
+                            </Pie>
+                            {/* Border ring: always keep the outer circle border visible */}
+                            <Pie
+                                data={[{ value: 1 }]}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                                fill="transparent"
+                            >
+                                <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                             </Pie>
                         </PieChart>
                     </div>
