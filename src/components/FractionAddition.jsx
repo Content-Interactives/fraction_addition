@@ -39,6 +39,9 @@ const FractionAddition = () => {
     const [firstMultiplier, setFirstMultiplier] = useState(null);
     const [showSecondMultipliers, setShowSecondMultipliers] = useState(false);
     const [secondMultiplier, setSecondMultiplier] = useState(null);
+    const [animateFirstMultiplierClones, setAnimateFirstMultiplierClones] = useState(false);
+    const [isSlidingFirstMultipliers, setIsSlidingFirstMultipliers] = useState(false);
+    const [firstMultipliersGreyed, setFirstMultipliersGreyed] = useState(false);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -88,6 +91,9 @@ const FractionAddition = () => {
         setShowAdjustButton(false);
         setFadeAdjustButton(false);
         setHideAdjustButton(false);
+        setAnimateFirstMultiplierClones(false);
+        setIsSlidingFirstMultipliers(false);
+        setFirstMultipliersGreyed(false);
     };
 
     // After common denominator bubble appears, fade in the Adjust Fractions button
@@ -115,6 +121,15 @@ const FractionAddition = () => {
             setSecondMultiplier(factor2);
             setShowFirstMultipliers(true);
             setShowSecondMultipliers(true);
+            // Delay before sliding clones, then grey originals during the slide
+            setTimeout(() => {
+                setAnimateFirstMultiplierClones(true);
+                setIsSlidingFirstMultipliers(true);
+                setFirstMultipliersGreyed(true);
+                setTimeout(() => {
+                    setIsSlidingFirstMultipliers(false);
+                }, 600); // matches slide-left-to-center duration
+            }, 800);
         }, 500);
     };
 
@@ -249,9 +264,17 @@ const FractionAddition = () => {
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
-                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ right: '-18px' }}>
-                                    x{firstMultiplier}
-                                </div>
+                                <>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation ${firstMultipliersGreyed ? 'text-gray-400' : ''}`} style={{ right: '-18px' }}>
+                                        x{firstMultiplier}
+                                    </div>
+                                    {/* Animated clone that slides over numerator */}
+                                    {animateFirstMultiplierClones && (
+                                        <div className="absolute top-1/2 text-lg slide-left-to-center" style={{ right: '-18px' }}>
+                                            x{firstMultiplier}
+                                        </div>
+                                    )}
+                                </>
                             )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{numerators[0]}</p>}
                         </div>
@@ -266,9 +289,17 @@ const FractionAddition = () => {
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
-                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ right: '-18px' }}>
-                                    x{firstMultiplier}
-                                </div>
+                                <>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation ${firstMultipliersGreyed ? 'text-gray-400' : ''}`} style={{ right: '-18px' }}>
+                                        x{firstMultiplier}
+                                    </div>
+                                    {/* Animated clone that slides over denominator */}
+                                    {animateFirstMultiplierClones && (
+                                        <div className="absolute top-1/2 text-lg slide-left-to-center" style={{ right: '-18px' }}>
+                                            x{firstMultiplier}
+                                        </div>
+                                    )}
+                                </>
                             )}
                             {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{denominators[0]}</p>}
                         </div>
