@@ -42,6 +42,29 @@ const FractionAddition = () => {
     const [animateFirstMultiplierClones, setAnimateFirstMultiplierClones] = useState(false);
     const [isSlidingFirstMultipliers, setIsSlidingFirstMultipliers] = useState(false);
     const [firstMultipliersGreyed, setFirstMultipliersGreyed] = useState(false);
+    // multipliers remain visible for now; keep state but unused
+    const [fadeOutFirstMultiplierLabels, setFadeOutFirstMultiplierLabels] = useState(false);
+    const [hideFirstMultiplierLabels, setHideFirstMultiplierLabels] = useState(false);
+    const [fadeOutFirstClones, setFadeOutFirstClones] = useState(false);
+    const [hideFirstClones, setHideFirstClones] = useState(false);
+    const [fadeOutFirstOriginalNumbers, setFadeOutFirstOriginalNumbers] = useState(false);
+    const [hideFirstOriginalNumbers, setHideFirstOriginalNumbers] = useState(false);
+    const [showFirstProducts, setShowFirstProducts] = useState(false);
+    const [firstProductNumerator, setFirstProductNumerator] = useState(null);
+    const [firstProductDenominator, setFirstProductDenominator] = useState(null);
+    const [animateSecondMultiplierClones, setAnimateSecondMultiplierClones] = useState(false);
+    const [isSlidingSecondMultipliers, setIsSlidingSecondMultipliers] = useState(false);
+    const [secondMultipliersGreyed, setSecondMultipliersGreyed] = useState(false);
+    const [fadeOutSecondClones, setFadeOutSecondClones] = useState(false);
+    const [hideSecondClones, setHideSecondClones] = useState(false);
+    const [fadeOutSecondOriginalNumbers, setFadeOutSecondOriginalNumbers] = useState(false);
+    const [hideSecondOriginalNumbers, setHideSecondOriginalNumbers] = useState(false);
+    const [showSecondProducts, setShowSecondProducts] = useState(false);
+    const [secondProductNumerator, setSecondProductNumerator] = useState(null);
+    const [secondProductDenominator, setSecondProductDenominator] = useState(null);
+    // multipliers remain visible for now; keep state but unused
+    const [fadeOutSecondMultiplierLabels, setFadeOutSecondMultiplierLabels] = useState(false);
+    const [hideSecondMultiplierLabels, setHideSecondMultiplierLabels] = useState(false);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -94,6 +117,27 @@ const FractionAddition = () => {
         setAnimateFirstMultiplierClones(false);
         setIsSlidingFirstMultipliers(false);
         setFirstMultipliersGreyed(false);
+        setFadeOutFirstMultiplierLabels(false);
+        setHideFirstMultiplierLabels(false);
+        setFadeOutFirstClones(false);
+        setHideFirstClones(false);
+        setFadeOutFirstOriginalNumbers(false);
+        setHideFirstOriginalNumbers(false);
+        setShowFirstProducts(false);
+        setFirstProductNumerator(null);
+        setFirstProductDenominator(null);
+        setAnimateSecondMultiplierClones(false);
+        setIsSlidingSecondMultipliers(false);
+        setSecondMultipliersGreyed(false);
+        setFadeOutSecondClones(false);
+        setHideSecondClones(false);
+        setFadeOutSecondOriginalNumbers(false);
+        setHideSecondOriginalNumbers(false);
+        setShowSecondProducts(false);
+        setSecondProductNumerator(null);
+        setSecondProductDenominator(null);
+        setFadeOutSecondMultiplierLabels(false);
+        setHideSecondMultiplierLabels(false);
     };
 
     // After common denominator bubble appears, fade in the Adjust Fractions button
@@ -119,6 +163,10 @@ const FractionAddition = () => {
             const factor2 = lcd / den2;
             setFirstMultiplier(factor1);
             setSecondMultiplier(factor2);
+            const num1 = parseInt(numerators[0], 10) || 0;
+            const deno1 = parseInt(denominators[0], 10) || 0;
+            setFirstProductNumerator(num1 * factor1);
+            setFirstProductDenominator(deno1 * factor1);
             setShowFirstMultipliers(true);
             setShowSecondMultipliers(true);
             // Delay before sliding clones, then grey originals during the slide
@@ -128,7 +176,40 @@ const FractionAddition = () => {
                 setFirstMultipliersGreyed(true);
                 setTimeout(() => {
                     setIsSlidingFirstMultipliers(false);
+                    // After slide completes, fade out clones and original numbers
+                    setFadeOutFirstClones(true);
+                    setFadeOutFirstOriginalNumbers(true);
+                    setTimeout(() => {
+                        setHideFirstClones(true);
+                        setHideFirstOriginalNumbers(true);
+                        // Show products where originals were, with fade-in
+                        setShowFirstProducts(true);
+                    }, 500); // match fade-out-animation duration
                 }, 600); // matches slide-left-to-center duration
+                // After first products fade in, run second fraction slide sequence (one side at a time)
+                setTimeout(() => {
+                    // compute second products based on factor2
+                    const num2 = parseInt(numerators[1], 10) || 0;
+                    const deno2 = parseInt(denominators[1], 10) || 0;
+                    setSecondProductNumerator(num2 * factor2);
+                    setSecondProductDenominator(deno2 * factor2);
+                    // Start slide and grey originals
+                    setAnimateSecondMultiplierClones(true);
+                    setIsSlidingSecondMultipliers(true);
+                    setSecondMultipliersGreyed(true);
+                    setTimeout(() => {
+                        setIsSlidingSecondMultipliers(false);
+                        // fade out clones and original numbers for second fraction
+                        setFadeOutSecondClones(true);
+                        setFadeOutSecondOriginalNumbers(true);
+                        setTimeout(() => {
+                            setHideSecondClones(true);
+                            setHideSecondOriginalNumbers(true);
+                            setShowSecondProducts(true);
+                            // Keep grey multiplier labels visible; no fade-out
+                        }, 500);
+                    }, 600);
+                }, 1000);
             }, 800);
         }, 500);
     };
@@ -265,18 +346,23 @@ const FractionAddition = () => {
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation ${firstMultipliersGreyed ? 'text-gray-400' : ''}`} style={{ right: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ right: '-18px' }}>
                                         x{firstMultiplier}
                                     </div>
                                     {/* Animated clone that slides over numerator */}
-                                    {animateFirstMultiplierClones && (
-                                        <div className="absolute top-1/2 text-lg slide-left-to-center" style={{ right: '-18px' }}>
+                                    {animateFirstMultiplierClones && !hideFirstClones && (
+                                        <div className={`absolute top-1/2 text-lg slide-left-to-center ${fadeOutFirstClones ? 'fade-out-animation' : ''}`} style={{ right: '-18px' }}>
                                             x{firstMultiplier}
                                         </div>
                                     )}
                                 </>
                             )}
-                            {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{numerators[0]}</p>}
+                            {showFractions && !hideFirstOriginalNumbers && (
+                                <p className={`absolute inset-0 text-2xl continue-animation flex items-center justify-center ${fadeOutFirstOriginalNumbers ? 'fade-out-animation' : ''}`}>{numerators[0]}</p>
+                            )}
+                            {showFractions && showFirstProducts && (
+                                <p className="absolute inset-0 text-2xl fade-in-animation flex items-center justify-center">{firstProductNumerator}</p>
+                            )}
                         </div>
                         <hr className={`w-full border-t-2 border-red-500 my-1 ${showAnimatedLines ? 'shrink-width-animation' : ''}`} />
                         <div className="relative">
@@ -290,18 +376,23 @@ const FractionAddition = () => {
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation ${firstMultipliersGreyed ? 'text-gray-400' : ''}`} style={{ right: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ right: '-18px' }}>
                                         x{firstMultiplier}
                                     </div>
                                     {/* Animated clone that slides over denominator */}
-                                    {animateFirstMultiplierClones && (
-                                        <div className="absolute top-1/2 text-lg slide-left-to-center" style={{ right: '-18px' }}>
+                                    {animateFirstMultiplierClones && !hideFirstClones && (
+                                        <div className={`absolute top-1/2 text-lg slide-left-to-center ${fadeOutFirstClones ? 'fade-out-animation' : ''}`} style={{ right: '-18px' }}>
                                             x{firstMultiplier}
                                         </div>
                                     )}
                                 </>
                             )}
-                            {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{denominators[0]}</p>}
+                            {showFractions && !hideFirstOriginalNumbers && (
+                                <p className={`absolute inset-0 text-2xl continue-animation flex items-center justify-center ${fadeOutFirstOriginalNumbers ? 'fade-out-animation' : ''}`}>{denominators[0]}</p>
+                            )}
+                            {showFractions && showFirstProducts && (
+                                <p className="absolute inset-0 text-2xl fade-in-animation flex items-center justify-center">{firstProductDenominator}</p>
+                            )}
                         </div>
                     </div>
                     <div className={`text-4xl mt-16 transition-opacity duration-300 ${hidePlusSign ? 'opacity-0' : ''}`}>+</div>
@@ -317,11 +408,23 @@ const FractionAddition = () => {
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
                             {showFractions && showSecondMultipliers && secondMultiplier !== null && (
-                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ left: '-18px' }}>
-                                    {secondMultiplier}x
-                                </div>
+                                <>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ left: '-18px' }}>
+                                        {secondMultiplier}x
+                                    </div>
+                                    {animateSecondMultiplierClones && !hideSecondClones && (
+                                        <div className={`absolute top-1/2 text-lg slide-right-to-center ${fadeOutSecondClones ? 'fade-out-animation' : ''}`} style={{ left: '-18px' }}>
+                                            {secondMultiplier}x
+                                        </div>
+                                    )}
+                                </>
                             )}
-                            {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{numerators[1]}</p>}
+                            {showFractions && !hideSecondOriginalNumbers && (
+                                <p className={`absolute inset-0 text-2xl continue-animation flex items-center justify-center ${fadeOutSecondOriginalNumbers ? 'fade-out-animation' : ''}`}>{numerators[1]}</p>
+                            )}
+                            {showFractions && showSecondProducts && (
+                                <p className="absolute inset-0 text-2xl fade-in-animation flex items-center justify-center">{secondProductNumerator}</p>
+                            )}
                         </div>
                         <hr className={`w-full border-t-2 border-blue-500 my-1 ${showAnimatedLines ? 'shrink-width-animation' : ''}`} />
                         <div className="relative">
@@ -334,11 +437,23 @@ const FractionAddition = () => {
                                 containerClassName={`${isShrinking ? 'shrink-out-animation' : ''}`}
                             />
                             {showFractions && showSecondMultipliers && secondMultiplier !== null && (
-                                <div className="absolute top-1/2 -translate-y-1/2 text-lg fade-in-animation" style={{ left: '-18px' }}>
-                                    {secondMultiplier}x
-                                </div>
+                                <>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ left: '-18px' }}>
+                                        {secondMultiplier}x
+                                    </div>
+                                    {animateSecondMultiplierClones && !hideSecondClones && (
+                                        <div className={`absolute top-1/2 text-lg slide-right-to-center ${fadeOutSecondClones ? 'fade-out-animation' : ''}`} style={{ left: '-18px' }}>
+                                            {secondMultiplier}x
+                                        </div>
+                                    )}
+                                </>
                             )}
-                            {showFractions && <p className="absolute inset-0 text-2xl continue-animation flex items-center justify-center">{denominators[1]}</p>}
+                            {showFractions && !hideSecondOriginalNumbers && (
+                                <p className={`absolute inset-0 text-2xl continue-animation flex items-center justify-center ${fadeOutSecondOriginalNumbers ? 'fade-out-animation' : ''}`}>{denominators[1]}</p>
+                            )}
+                            {showFractions && showSecondProducts && (
+                                <p className="absolute inset-0 text-2xl fade-in-animation flex items-center justify-center">{secondProductDenominator}</p>
+                            )}
                         </div>
                     </div>
                 </div>
