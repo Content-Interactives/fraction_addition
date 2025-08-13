@@ -68,6 +68,9 @@ const FractionAddition = () => {
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
+    // Second pie re-slice sequence controls
+    const [secondPieHideSliceLines, setSecondPieHideSliceLines] = useState(false);
+    const [secondPieUseCommonDenominator, setSecondPieUseCommonDenominator] = useState(false);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -143,6 +146,8 @@ const FractionAddition = () => {
         setHideSecondMultiplierLabels(false);
         setFirstPieHideSliceLines(false);
         setFirstPieUseCommonDenominator(false);
+        setSecondPieHideSliceLines(false);
+        setSecondPieUseCommonDenominator(false);
     };
 
     // After common denominator bubble appears, fade in the Adjust Fractions button
@@ -266,6 +271,19 @@ const FractionAddition = () => {
                 const delayFadeIn = setTimeout(() => {
                     // 3) Then fade the new slice lines in
                     setFirstPieHideSliceLines(false);
+                    // 4) After first pie completes its fade-in, run the same sequence for the second pie
+                    const delaySecondPieHide = setTimeout(() => {
+                        setSecondPieHideSliceLines(true);
+                        const delaySecondPieReslice = setTimeout(() => {
+                            setSecondPieUseCommonDenominator(true);
+                            const delaySecondPieFadeIn = setTimeout(() => {
+                                setSecondPieHideSliceLines(false);
+                            }, 50);
+                            return () => clearTimeout(delaySecondPieFadeIn);
+                        }, 300);
+                        return () => clearTimeout(delaySecondPieReslice);
+                    }, 400);
+                    return () => clearTimeout(delaySecondPieHide);
                 }, 50);
                 return () => clearTimeout(delayFadeIn);
             }, 300);
@@ -547,21 +565,59 @@ const FractionAddition = () => {
                     </div>
                     <div className="w-28 h-28" style={{ transform: 'translateX(8px)' }}>
                         <PieChart width={112} height={112}>
+                            {/* Fill layer: keeps filled proportion static */}
                             <Pie
-                                data={Array.from({ length: parseInt(denominators[1]) }).map(() => ({ value: 1 }))}
+                                data={(() => {
+                                    const den1 = parseInt(denominators[1] || 0);
+                                    const num1 = parseInt(numerators[1] || 0);
+                                    const safeDen = den1 > 0 ? den1 : 1;
+                                    const safeNum = Math.min(num1, safeDen);
+                                    return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
+                                })()}
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={50}
-                                fill="#8884d8"
                                 dataKey="value"
                                 startAngle={90}
                                 endAngle={450}
+                                stroke="none"
                             >
-                                {
-                                    Array.from({ length: parseInt(denominators[1]) }).map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={index < parseInt(numerators[1]) ? '#3B82F6' : '#FFFFFF'} stroke="#000" strokeWidth={1} />
-                                    ))
-                                }
+                                <Cell fill="#3B82F6" />
+                                <Cell fill="#FFFFFF" />
+                            </Pie>
+                            {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
+                            <Pie
+                                data={Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map(() => ({ value: 1 }))}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                                fill="transparent"
+                            >
+                                {Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map((_, index) => (
+                                    <Cell
+                                        key={`outline-cell-second-${index}`}
+                                        fill="transparent"
+                                        stroke="#000"
+                                        strokeWidth={1}
+                                        style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: secondPieHideSliceLines ? 0 : 1 }}
+                                    />
+                                ))}
+                            </Pie>
+                            {/* Border ring: always keep the outer circle border visible */}
+                            <Pie
+                                data={[{ value: 1 }]}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={50}
+                                dataKey="value"
+                                startAngle={90}
+                                endAngle={450}
+                                fill="transparent"
+                            >
+                                <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                             </Pie>
                         </PieChart>
                     </div>
