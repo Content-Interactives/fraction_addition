@@ -72,6 +72,7 @@ const FractionAddition = () => {
     // multipliers remain visible for now; keep state but unused
     const [fadeOutSecondMultiplierLabels, setFadeOutSecondMultiplierLabels] = useState(false);
     const [hideSecondMultiplierLabels, setHideSecondMultiplierLabels] = useState(false);
+    const [fadeMultipliers, setFadeMultipliers] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -179,6 +180,7 @@ const FractionAddition = () => {
         setSecondProductDenominator(null);
         setFadeOutSecondMultiplierLabels(false);
         setHideSecondMultiplierLabels(false);
+        setFadeMultipliers(false);
         setFirstPieHideSliceLines(false);
         setFirstPieUseCommonDenominator(false);
         setSecondPieHideSliceLines(false);
@@ -260,7 +262,11 @@ const FractionAddition = () => {
     };
 
     const handleAddNumerators = () => {
-        
+        setFadeAddNumeratorsButton(true);
+        setTimeout(() => {
+            setHideAddNumeratorsButton(true);
+            setFadeMultipliers(true);
+        }, 500);
     };
 
     const greatestCommonDivisor = (a, b) => {
@@ -430,7 +436,7 @@ const FractionAddition = () => {
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ right: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} ${fadeMultipliers ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ right: '-18px' }}>
                                         x{firstMultiplier}
                                     </div>
                                     {/* Animated clone that slides over numerator */}
@@ -460,7 +466,7 @@ const FractionAddition = () => {
                             />
                             {showFractions && showFirstMultipliers && firstMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ right: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${firstMultipliersGreyed ? 'text-gray-400' : ''} ${fadeMultipliers ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ right: '-18px' }}>
                                         x{firstMultiplier}
                                     </div>
                                     {/* Animated clone that slides over denominator */}
@@ -493,7 +499,7 @@ const FractionAddition = () => {
                             />
                             {showFractions && showSecondMultipliers && secondMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ left: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} ${fadeMultipliers ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ left: '-18px' }}>
                                         {secondMultiplier}x
                                     </div>
                                     {animateSecondMultiplierClones && !hideSecondClones && (
@@ -522,7 +528,7 @@ const FractionAddition = () => {
                             />
                             {showFractions && showSecondMultipliers && secondMultiplier !== null && (
                                 <>
-                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} fade-in-animation`} style={{ left: '-18px' }}>
+                                    <div className={`absolute top-1/2 -translate-y-1/2 text-lg ${secondMultipliersGreyed ? 'text-gray-400' : ''} ${fadeMultipliers ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ left: '-18px' }}>
                                         {secondMultiplier}x
                                     </div>
                                     {animateSecondMultiplierClones && !hideSecondClones && (
