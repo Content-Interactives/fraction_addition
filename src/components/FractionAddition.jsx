@@ -73,6 +73,7 @@ const FractionAddition = () => {
     const [fadeOutSecondMultiplierLabels, setFadeOutSecondMultiplierLabels] = useState(false);
     const [hideSecondMultiplierLabels, setHideSecondMultiplierLabels] = useState(false);
     const [fadeMultipliers, setFadeMultipliers] = useState(false);
+    const [showMiddlePieChart, setShowMiddlePieChart] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -181,6 +182,7 @@ const FractionAddition = () => {
         setFadeOutSecondMultiplierLabels(false);
         setHideSecondMultiplierLabels(false);
         setFadeMultipliers(false);
+        setShowMiddlePieChart(false);
         setFirstPieHideSliceLines(false);
         setFirstPieUseCommonDenominator(false);
         setSecondPieHideSliceLines(false);
@@ -266,6 +268,9 @@ const FractionAddition = () => {
         setTimeout(() => {
             setHideAddNumeratorsButton(true);
             setFadeMultipliers(true);
+            setTimeout(() => {
+                setShowMiddlePieChart(true);
+            }, 500);
         }, 500);
     };
 
@@ -549,123 +554,161 @@ const FractionAddition = () => {
                 </div>
             </div>
             {showPieCharts && (
-                <div className="flex justify-center items-center mt-2 space-x-32 continue-animation">
-                    <div className="w-28 h-28" style={{ transform: 'translateX(-8px)' }}>
-                        <PieChart width={112} height={112}>
-                            {/* Fill layer: keeps filled proportion static */}
-                            <Pie
-                                data={(() => {
-                                    const den0 = parseInt(denominators[0] || 0);
-                                    const num0 = parseInt(numerators[0] || 0);
-                                    const safeDen = den0 > 0 ? den0 : 1;
-                                    const safeNum = Math.min(num0, safeDen);
-                                    return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
-                                })()}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                stroke="none"
-                            >
-                                <Cell fill="#EF4444" />
-                                <Cell fill="#FFFFFF" />
-                            </Pie>
-                            {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
-                            <Pie
-                                data={Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map(() => ({ value: 1 }))}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                fill="transparent"
-                            >
-                                {Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map((_, index) => (
-                                    <Cell
-                                        key={`outline-cell-${index}`}
-                                        fill="transparent"
-                                        stroke="#000"
-                                        strokeWidth={1}
-                                        style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: firstPieHideSliceLines ? 0 : 1 }}
-                                    />
-                                ))}
-                            </Pie>
-                            {/* Border ring: always keep the outer circle border visible */}
-                            <Pie
-                                data={[{ value: 1 }]}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                fill="transparent"
-                            >
-                                <Cell fill="transparent" stroke="#000" strokeWidth={1} />
-                            </Pie>
-                        </PieChart>
+                <div className="relative">
+                    <div className="flex justify-center items-center mt-2 space-x-32 continue-animation">
+                        <div className="w-28 h-28" style={{ transform: 'translateX(-8px)' }}>
+                            <PieChart width={112} height={112}>
+                                {/* Fill layer: keeps filled proportion static */}
+                                <Pie
+                                    data={(() => {
+                                        const den0 = parseInt(denominators[0] || 0);
+                                        const num0 = parseInt(numerators[0] || 0);
+                                        const safeDen = den0 > 0 ? den0 : 1;
+                                        const safeNum = Math.min(num0, safeDen);
+                                        return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
+                                    })()}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    stroke="none"
+                                >
+                                    <Cell fill="#EF4444" />
+                                    <Cell fill="#FFFFFF" />
+                                </Pie>
+                                {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
+                                <Pie
+                                    data={Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map(() => ({ value: 1 }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    {Array.from({ length: (firstPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[0] || 0)) || 0 }).map((_, index) => (
+                                        <Cell
+                                            key={`outline-cell-${index}`}
+                                            fill="transparent"
+                                            stroke="#000"
+                                            strokeWidth={1}
+                                            style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: firstPieHideSliceLines ? 0 : 1 }}
+                                        />
+                                    ))}
+                                </Pie>
+                                {/* Border ring: always keep the outer circle border visible */}
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    <Cell fill="transparent" stroke="#000" strokeWidth={1} />
+                                </Pie>
+                            </PieChart>
+                        </div>
+                        <div className="w-28 h-28" style={{ transform: 'translateX(8px)' }}>
+                            <PieChart width={112} height={112}>
+                                {/* Fill layer: keeps filled proportion static */}
+                                <Pie
+                                    data={(() => {
+                                        const den1 = parseInt(denominators[1] || 0);
+                                        const num1 = parseInt(numerators[1] || 0);
+                                        const safeDen = den1 > 0 ? den1 : 1;
+                                        const safeNum = Math.min(num1, safeDen);
+                                        return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
+                                    })()}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    stroke="none"
+                                >
+                                    <Cell fill="#3B82F6" />
+                                    <Cell fill="#FFFFFF" />
+                                </Pie>
+                                {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
+                                <Pie
+                                    data={Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map(() => ({ value: 1 }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    {Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map((_, index) => (
+                                        <Cell
+                                            key={`outline-cell-second-${index}`}
+                                            fill="transparent"
+                                            stroke="#000"
+                                            strokeWidth={1}
+                                            style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: secondPieHideSliceLines ? 0 : 1 }}
+                                        />
+                                    ))}
+                                </Pie>
+                                {/* Border ring: always keep the outer circle border visible */}
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    <Cell fill="transparent" stroke="#000" strokeWidth={1} />
+                                </Pie>
+                            </PieChart>
+                        </div>
                     </div>
-                    <div className="w-28 h-28" style={{ transform: 'translateX(8px)' }}>
-                        <PieChart width={112} height={112}>
-                            {/* Fill layer: keeps filled proportion static */}
-                            <Pie
-                                data={(() => {
-                                    const den1 = parseInt(denominators[1] || 0);
-                                    const num1 = parseInt(numerators[1] || 0);
-                                    const safeDen = den1 > 0 ? den1 : 1;
-                                    const safeNum = Math.min(num1, safeDen);
-                                    return [{ value: safeNum }, { value: Math.max(safeDen - safeNum, 0) }];
-                                })()}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                stroke="none"
-                            >
-                                <Cell fill="#3B82F6" />
-                                <Cell fill="#FFFFFF" />
-                            </Pie>
-                            {/* Outline layer: toggles slice lines and slice count without changing fill; lines fade via strokeOpacity */}
-                            <Pie
-                                data={Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map(() => ({ value: 1 }))}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                fill="transparent"
-                            >
-                                {Array.from({ length: (secondPieUseCommonDenominator ? parseInt(commonDenominator || 0) : parseInt(denominators[1] || 0)) || 0 }).map((_, index) => (
-                                    <Cell
-                                        key={`outline-cell-second-${index}`}
-                                        fill="transparent"
-                                        stroke="#000"
-                                        strokeWidth={1}
-                                        style={{ transition: 'stroke-opacity 0.3s ease', strokeOpacity: secondPieHideSliceLines ? 0 : 1 }}
-                                    />
-                                ))}
-                            </Pie>
-                            {/* Border ring: always keep the outer circle border visible */}
-                            <Pie
-                                data={[{ value: 1 }]}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={50}
-                                dataKey="value"
-                                startAngle={90}
-                                endAngle={450}
-                                fill="transparent"
-                            >
-                                <Cell fill="transparent" stroke="#000" strokeWidth={1} />
-                            </Pie>
-                        </PieChart>
-                    </div>
+                    {showMiddlePieChart && (
+                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '3px', left: 'calc(50% - 3.5rem)' }}>
+                            <PieChart width={112} height={112}>
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                >
+                                    <Cell fill="#FFFFFF" stroke="#000" strokeWidth={1} />
+                                </Pie>
+                                <Pie
+                                    data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    {Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map((_, index) => (
+                                        <Cell
+                                            key={`middle-pie-cell-${index}`}
+                                            fill="transparent"
+                                            stroke="#000"
+                                            strokeWidth={1}
+                                        />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </div>
+                    )}
                 </div>
             )}
             {!hideFirstFlexi && (
@@ -717,7 +760,7 @@ const FractionAddition = () => {
                 </div>
             )}
         </Container>
-)
+	)
 };
 
 
