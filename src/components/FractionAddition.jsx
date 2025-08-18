@@ -6,6 +6,7 @@ import { GlowButton } from './ui/reused-ui/GlowButton';
 import { PieChart, Pie, Cell } from 'recharts';
 import FlexiWave from '../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
 import FlexiTeacher from '../assets/All Flexi Poses/SVG/Flexi_Teacher.svg';
+import FlexiThumbsUp from '../assets/All Flexi Poses/SVG/Flexi_ThumbsUp.svg';
 import './ui/reused-animations/width.css';
 import './ui/reused-animations/fade.css';
 
@@ -34,6 +35,9 @@ const FractionAddition = () => {
     const [fadeSecondFlexi, setFadeSecondFlexi] = useState(false);
     const [hideSecondFlexi, setHideSecondFlexi] = useState(false);
     const [showCommonFlexi, setShowCommonFlexi] = useState(false);
+    const [fadeCommonFlexi, setFadeCommonFlexi] = useState(false);
+    const [hideCommonFlexi, setHideCommonFlexi] = useState(false);
+    const [showThumbsUpFlexi, setShowThumbsUpFlexi] = useState(false);
     const [commonDenominator, setCommonDenominator] = useState(null);
     const [showFirstMultipliers, setShowFirstMultipliers] = useState(false);
     const [firstMultiplier, setFirstMultiplier] = useState(null);
@@ -71,6 +75,22 @@ const FractionAddition = () => {
     // Second pie re-slice sequence controls
     const [secondPieHideSliceLines, setSecondPieHideSliceLines] = useState(false);
     const [secondPieUseCommonDenominator, setSecondPieUseCommonDenominator] = useState(false);
+
+    useEffect(() => {
+        if (!secondPieUseCommonDenominator) return;
+
+        const dynamicDelay = 1000 + (commonDenominator || 0) * 15;
+
+        const timer = setTimeout(() => {
+            setFadeCommonFlexi(true);
+            setTimeout(() => {
+                setHideCommonFlexi(true);
+                setShowThumbsUpFlexi(true);
+            }, 500);
+        }, dynamicDelay);
+
+        return () => clearTimeout(timer);
+    }, [secondPieUseCommonDenominator, commonDenominator]);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -112,6 +132,9 @@ const FractionAddition = () => {
         setFadeSecondFlexi(false);
         setHideSecondFlexi(false);
         setShowCommonFlexi(false);
+        setFadeCommonFlexi(false);
+        setHideCommonFlexi(false);
+        setShowThumbsUpFlexi(false);
         setCommonDenominator(null);
         setShowFirstMultipliers(false);
         setFirstMultiplier(null);
@@ -633,9 +656,14 @@ const FractionAddition = () => {
                     Nice, now we find a common denominator
                 </FlexiText>
             )}
-            {showCommonFlexi && (
-                <FlexiText flexiImage={FlexiTeacher} className="fade-in-up-animation">
+            {showCommonFlexi && !hideCommonFlexi && (
+                <FlexiText flexiImage={FlexiTeacher} className={`${fadeCommonFlexi ? 'fade-out-up-animation' : 'fade-in-up-animation'}`}>
                     The common denominator for <span className="text-red-500 font-bold">{denominators[0]}</span> and <span className="text-blue-500 font-bold">{denominators[1]}</span> is <span className="text-purple-600 font-bold">{commonDenominator}</span>. Now let's adjust the fractions to use our common denominator.
+                </FlexiText>
+            )}
+            {showThumbsUpFlexi && (
+                <FlexiText flexiImage={FlexiThumbsUp} className="fade-in-up-animation">
+                    Nice!
                 </FlexiText>
             )}
             {showAdjustButton && !hideAdjustButton && (
