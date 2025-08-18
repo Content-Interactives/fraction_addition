@@ -38,6 +38,9 @@ const FractionAddition = () => {
     const [fadeCommonFlexi, setFadeCommonFlexi] = useState(false);
     const [hideCommonFlexi, setHideCommonFlexi] = useState(false);
     const [showThumbsUpFlexi, setShowThumbsUpFlexi] = useState(false);
+    const [showAddNumeratorsButton, setShowAddNumeratorsButton] = useState(false);
+    const [fadeAddNumeratorsButton, setFadeAddNumeratorsButton] = useState(false);
+    const [hideAddNumeratorsButton, setHideAddNumeratorsButton] = useState(false);
     const [commonDenominator, setCommonDenominator] = useState(null);
     const [showFirstMultipliers, setShowFirstMultipliers] = useState(false);
     const [firstMultiplier, setFirstMultiplier] = useState(null);
@@ -79,18 +82,24 @@ const FractionAddition = () => {
     useEffect(() => {
         if (!secondPieUseCommonDenominator) return;
 
-        const dynamicDelay = 1000 + (commonDenominator || 0) * 15;
-
         const timer = setTimeout(() => {
             setFadeCommonFlexi(true);
             setTimeout(() => {
                 setHideCommonFlexi(true);
                 setShowThumbsUpFlexi(true);
             }, 500);
-        }, dynamicDelay);
+        }, 2500);
 
         return () => clearTimeout(timer);
-    }, [secondPieUseCommonDenominator, commonDenominator]);
+    }, [secondPieUseCommonDenominator]);
+
+    useEffect(() => {
+        if (!showThumbsUpFlexi) return;
+        const timer = setTimeout(() => {
+            setShowAddNumeratorsButton(true);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [showThumbsUpFlexi]);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -135,6 +144,9 @@ const FractionAddition = () => {
         setFadeCommonFlexi(false);
         setHideCommonFlexi(false);
         setShowThumbsUpFlexi(false);
+        setShowAddNumeratorsButton(false);
+        setFadeAddNumeratorsButton(false);
+        setHideAddNumeratorsButton(false);
         setCommonDenominator(null);
         setShowFirstMultipliers(false);
         setFirstMultiplier(null);
@@ -245,6 +257,10 @@ const FractionAddition = () => {
                 }, 1000);
             }, 800);
         }, 500);
+    };
+
+    const handleAddNumerators = () => {
+        
     };
 
     const greatestCommonDivisor = (a, b) => {
@@ -663,13 +679,20 @@ const FractionAddition = () => {
             )}
             {showThumbsUpFlexi && (
                 <FlexiText flexiImage={FlexiThumbsUp} className="fade-in-up-animation">
-                    Nice!
+                    Nice, now it's time to add the numerators!
                 </FlexiText>
             )}
             {showAdjustButton && !hideAdjustButton && (
                 <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeAdjustButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
                     <GlowButton onClick={handleAdjustFractions} bgColor="#E8EDF5" autoShrinkOnClick={false}>
                         <p className="whitespace-nowrap">Adjust Fractions</p>
+                    </GlowButton>
+                </div>
+            )}
+            {showAddNumeratorsButton && !hideAddNumeratorsButton && (
+                <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeAddNumeratorsButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
+                    <GlowButton onClick={handleAddNumerators} bgColor="#E8EDF5" autoShrinkOnClick={false}>
+                        <p className="whitespace-nowrap">Add Numerators</p>
                     </GlowButton>
                 </div>
             )}
