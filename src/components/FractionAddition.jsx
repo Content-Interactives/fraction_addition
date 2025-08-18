@@ -74,6 +74,7 @@ const FractionAddition = () => {
     const [hideSecondMultiplierLabels, setHideSecondMultiplierLabels] = useState(false);
     const [fadeMultipliers, setFadeMultipliers] = useState(false);
     const [showMiddlePieChart, setShowMiddlePieChart] = useState(false);
+    const [combinedPieData, setCombinedPieData] = useState(null);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -185,6 +186,7 @@ const FractionAddition = () => {
         setShowMiddlePieChart(false);
         setFirstPieHideSliceLines(false);
         setFirstPieUseCommonDenominator(false);
+        setCombinedPieData(null);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -270,6 +272,16 @@ const FractionAddition = () => {
             setFadeMultipliers(true);
             setTimeout(() => {
                 setShowMiddlePieChart(true);
+                setTimeout(() => {
+                    const num1 = firstProductNumerator || 0;
+                    const num2 = secondProductNumerator || 0;
+                    const den = commonDenominator || 1;
+                    setCombinedPieData([
+                        { name: 'Numerator 1', value: num1 },
+                        { name: 'Numerator 2', value: num2 },
+                        { name: 'Remainder', value: den - num1 - num2 },
+                    ]);
+                }, 2000);
             }, 500);
         }, 500);
     };
@@ -687,6 +699,22 @@ const FractionAddition = () => {
                                 >
                                     <Cell fill="#FFFFFF" stroke="#000" strokeWidth={1} />
                                 </Pie>
+                                {combinedPieData && (
+                                    <Pie
+                                        data={combinedPieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={50}
+                                        dataKey="value"
+                                        startAngle={90}
+                                        endAngle={450}
+                                        animationDuration={1000}
+                                    >
+                                        <Cell fill="#EF4444" />
+                                        <Cell fill="#3B82F6" />
+                                        <Cell fill="transparent" />
+                                    </Pie>
+                                )}
                                 <Pie
                                     data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
                                     cx="50%"
