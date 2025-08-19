@@ -83,7 +83,16 @@ const FractionAddition = () => {
     const [showAdditionPlusSign, setShowAdditionPlusSign] = useState(false);
     const [showEqualSign, setShowEqualSign] = useState(false);
     const [showFractionSum, setShowFractionSum] = useState(false);
-    const [transitionToPurple, setTransitionToPurple] = useState(false);
+    const [simplePurpleTransition, setSimplePurpleTransition] = useState(false);
+    const [showFinalFlexi, setShowFinalFlexi] = useState(false);
+    const [fadeThumbsUpFlexi, setFadeThumbsUpFlexi] = useState(false);
+    const [hideThumbsUpFlexi, setHideThumbsUpFlexi] = useState(false);
+    const [showSimplifyButton, setShowSimplifyButton] = useState(false);
+    const [fadeFirstElements, setFadeFirstElements] = useState(false);
+    const [fadeSecondElements, setFadeSecondElements] = useState(false);
+    const [fadePlusAndEqual, setFadePlusAndEqual] = useState(false);
+    const [fadeSimplifyButton, setFadeSimplifyButton] = useState(false);
+    const [hideSimplifyButton, setHideSimplifyButton] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -164,15 +173,36 @@ const FractionAddition = () => {
         return () => clearTimeout(timer);
     }, [bluePieData]);
 
-    // Transition to purple after fraction sum appears
+    // Simple purple transition after fraction sum appears
     useEffect(() => {
-        if (!showFractionSum) return;
-        // Wait 1 second after fraction sum appears, then start purple transition
+        if (!showFractionSum || simplePurpleTransition) return;
         const timer = setTimeout(() => {
-            setTransitionToPurple(true);
+            setSimplePurpleTransition(true);
         }, 1000);
         return () => clearTimeout(timer);
-    }, [showFractionSum]);
+    }, [showFractionSum, simplePurpleTransition]);
+
+    // Show final Flexi after purple transition
+    useEffect(() => {
+        if (!simplePurpleTransition) return;
+        const timer = setTimeout(() => {
+            setFadeThumbsUpFlexi(true);
+            setTimeout(() => {
+                setHideThumbsUpFlexi(true);
+                setShowFinalFlexi(true);
+            }, 500);
+        }, 2500);
+        return () => clearTimeout(timer);
+    }, [simplePurpleTransition]);
+
+    // Show Simplify button after final Flexi appears
+    useEffect(() => {
+        if (!showFinalFlexi) return;
+        const timer = setTimeout(() => {
+            setShowSimplifyButton(true);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [showFinalFlexi]);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -265,7 +295,16 @@ const FractionAddition = () => {
         setShowAdditionPlusSign(false);
         setShowEqualSign(false);
         setShowFractionSum(false);
-        setTransitionToPurple(false);
+        setSimplePurpleTransition(false);
+        setShowFinalFlexi(false);
+        setFadeThumbsUpFlexi(false);
+        setHideThumbsUpFlexi(false);
+        setShowSimplifyButton(false);
+        setFadeFirstElements(false);
+        setFadeSecondElements(false);
+        setFadePlusAndEqual(false);
+        setFadeSimplifyButton(false);
+        setHideSimplifyButton(false);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -371,6 +410,18 @@ const FractionAddition = () => {
                     }, 2000);
                 }, 800); // Wait for translation to complete
             }, 500);
+        }, 500);
+    };
+
+    const handleSimplify = () => {
+        // Fade out first and second fractions, pie charts, plus and equal signs
+        setFadeFirstElements(true);
+        setFadeSecondElements(true);
+        setFadePlusAndEqual(true);
+        setFadeSimplifyButton(true);
+        // Hide the button after fade completes
+        setTimeout(() => {
+            setHideSimplifyButton(true);
         }, 500);
     };
 
@@ -528,7 +579,7 @@ const FractionAddition = () => {
         >
             <div className="flex justify-center items-start h-full" style={{ position: 'relative', top: '60px' }}>
                 <div className="flex items-start space-x-4">
-                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out ${translateFractions ? '-translate-y-20 -translate-x-16' : ''}`}>
+                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out ${translateFractions ? '-translate-y-20 -translate-x-16' : ''} ${fadeFirstElements ? 'fade-out-animation' : ''}`}>
                         <p className={`text-base mb-2 text-center h-10 text-red-500 ${hideFractionLabels ? 'fade-out-up-animation' : ''}`}>First Fraction</p>
                         <div className="relative">
                             <Input
@@ -591,7 +642,7 @@ const FractionAddition = () => {
                         </div>
                     </div>
                     <div className={`text-4xl mt-16 transition-opacity duration-300 ${hidePlusSign ? 'opacity-0' : ''}`}>+</div>
-                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out`} style={{ 
+                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out ${fadeSecondElements ? 'fade-out-animation' : ''}`} style={{ 
                         transform: `${translateFractions ? 'translateY(-5rem) translateX(3.75rem)' : 'translateY(0) translateX(0)'} ${translateSecondElements ? 'translateX(-10.25rem)' : ''}`.trim()
                     }}>
                         <p className={`text-base mb-2 text-center h-10 text-blue-500 ${hideFractionLabels ? 'fade-out-up-animation' : ''}`}>Second Fraction</p>
@@ -658,7 +709,7 @@ const FractionAddition = () => {
             {showPieCharts && (
                 <div className="relative">
                     <div className="flex justify-center items-center mt-2 space-x-32 continue-animation">
-                        <div className="w-28 h-28" style={{ transform: 'translateX(-8px)' }}>
+                        <div className={`w-28 h-28 ${fadeFirstElements ? 'fade-out-animation' : ''}`} style={{ transform: 'translateX(-8px)' }}>
                             <PieChart width={112} height={112}>
                                 {/* Fill layer: keeps filled proportion static */}
                                 <Pie
@@ -716,7 +767,7 @@ const FractionAddition = () => {
                                 </Pie>
                             </PieChart>
                         </div>
-                        <div className="w-28 h-28" style={{ transform: translateSecondElements ? 'translateX(-8.375rem)' : 'translateX(0px)', transition: 'transform 0.8s ease-out' }}>
+                        <div className={`w-28 h-28 ${fadeSecondElements ? 'fade-out-animation' : ''}`} style={{ transform: translateSecondElements ? 'translateX(-8.375rem)' : 'translateX(0px)', transition: 'transform 0.8s ease-out' }}>
                             <PieChart width={112} height={112}>
                                 {/* Fill layer: keeps filled proportion static */}
                                 <Pie
@@ -815,8 +866,8 @@ const FractionAddition = () => {
                                         endAngle={450}
                                         animationDuration={1000}
                                     >
-                                        <Cell fill="#EF4444" className={transitionToPurple ? 'red-to-purple-animation' : ''} />
-                                        <Cell fill="#3B82F6" className={transitionToPurple ? 'blue-to-purple-animation' : ''} />
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#EF4444"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
                                         <Cell fill="transparent" />
                                     </Pie>
                                 )}
@@ -845,14 +896,14 @@ const FractionAddition = () => {
                     
                     {/* Plus sign between moved fractions */}
                     {showAdditionPlusSign && (
-                        <div className="absolute fade-in-animation" style={{ top: '-102px', left: 'calc(50% - 5.7rem)', fontSize: '2rem' }}>
+                        <div className={`absolute ${fadePlusAndEqual ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ top: '-102px', left: 'calc(50% - 5.7rem)', fontSize: '2rem' }}>
                             +
                         </div>
                     )}
                     
                     {/* Equal sign */}
                     {showEqualSign && (
-                        <div className="absolute fade-in-animation" style={{ top: '-102px', left: 'calc(50% - 0.3rem)', fontSize: '2rem' }}>
+                        <div className={`absolute ${fadePlusAndEqual ? 'fade-out-animation' : 'fade-in-animation'}`} style={{ top: '-102px', left: 'calc(50% - 0.3rem)', fontSize: '2rem' }}>
                             =
                         </div>
                     )}
@@ -897,7 +948,7 @@ const FractionAddition = () => {
                                     endAngle={450}
                                     animationDuration={1000}
                                                                     >
-                                        <Cell fill="#3B82F6" className={transitionToPurple ? 'blue-to-purple-animation' : ''} />
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
                                         <Cell fill="transparent" />
                                     </Pie>
                                 <Pie
@@ -939,9 +990,14 @@ const FractionAddition = () => {
                     The common denominator for <span className="text-red-500 font-bold">{denominators[0]}</span> and <span className="text-blue-500 font-bold">{denominators[1]}</span> is <span className="text-purple-600 font-bold">{commonDenominator}</span>. Now let's adjust the fractions to use our common denominator.
                 </FlexiText>
             )}
-            {showThumbsUpFlexi && (
-                <FlexiText flexiImage={FlexiThumbsUp} className="fade-in-up-animation">
+            {showThumbsUpFlexi && !hideThumbsUpFlexi && (
+                <FlexiText flexiImage={FlexiThumbsUp} className={`${fadeThumbsUpFlexi ? 'fade-out-up-animation' : 'fade-in-up-animation'}`}>
                     Nice, now it's time to add the numerators!
+                </FlexiText>
+            )}
+            {showFinalFlexi && (
+                <FlexiText flexiImage={FlexiThumbsUp} className="fade-in-up-animation">
+                    Awesome, now all we need to do is to simplify!
                 </FlexiText>
             )}
             {showAdjustButton && !hideAdjustButton && (
@@ -955,6 +1011,13 @@ const FractionAddition = () => {
                 <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeAddNumeratorsButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
                     <GlowButton onClick={handleAddNumerators} bgColor="#E8EDF5" autoShrinkOnClick={false}>
                         <p className="whitespace-nowrap">Add Numerators</p>
+                    </GlowButton>
+                </div>
+            )}
+            {showSimplifyButton && !hideSimplifyButton && (
+                <div className={`absolute bottom-0 right-0 z-10 p-4 ${fadeSimplifyButton ? 'fade-out-animation' : 'fade-in-animation'}`}>
+                    <GlowButton onClick={handleSimplify} bgColor="#E8EDF5" autoShrinkOnClick={false}>
+                        <p className="whitespace-nowrap">Simplify</p>
                     </GlowButton>
                 </div>
             )}
