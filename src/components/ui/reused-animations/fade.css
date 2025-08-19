@@ -143,6 +143,19 @@
 .slide-right-to-center {
     animation: slideRightToCenter 0.6s ease-out forwards;
 }
+
+@keyframes slideToLeft {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+.slide-to-left {
+    animation: slideToLeft 0.8s ease-out forwards;
+}
 .fade-in-up-animation {
     animation: fadeInUpAnimation 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

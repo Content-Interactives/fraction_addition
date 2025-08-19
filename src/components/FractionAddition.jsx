@@ -77,6 +77,10 @@ const FractionAddition = () => {
     const [combinedPieData, setCombinedPieData] = useState(null);
     const [redPieData, setRedPieData] = useState(null);
     const [bluePieData, setBluePieData] = useState(null);
+    const [excessBluePieData, setExcessBluePieData] = useState(null);
+    const [showExcessBlueChart, setShowExcessBlueChart] = useState(false);
+    const [translateSecondElements, setTranslateSecondElements] = useState(false);
+    const [showAdditionPlusSign, setShowAdditionPlusSign] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -114,11 +118,35 @@ const FractionAddition = () => {
             const num1 = firstProductNumerator || 0;
             const num2 = secondProductNumerator || 0;
             const den = commonDenominator || 1;
-            setBluePieData([
-                { name: 'Numerator 1', value: num1 },
-                { name: 'Numerator 2', value: num2 },
-                { name: 'Remainder', value: den - num1 - num2 },
-            ]);
+            const totalNumerator = num1 + num2;
+            
+            if (totalNumerator <= den) {
+                // Proper fraction - blue fits in the same circle
+                setBluePieData([
+                    { name: 'Numerator 1', value: num1 },
+                    { name: 'Numerator 2', value: num2 },
+                    { name: 'Remainder', value: den - totalNumerator },
+                ]);
+            } else {
+                // Improper fraction - blue overflows
+                const blueInMainCircle = den - num1; // Remaining space after red
+                const excessBlue = num2 - blueInMainCircle; // Overflow amount
+                
+                setBluePieData([
+                    { name: 'Numerator 1', value: num1 },
+                    { name: 'Numerator 2', value: blueInMainCircle },
+                    { name: 'Remainder', value: 0 },
+                ]);
+                
+                // Show excess blue in separate chart above
+                setTimeout(() => {
+                    setShowExcessBlueChart(true);
+                    setExcessBluePieData([
+                        { name: 'Excess Blue', value: excessBlue },
+                        { name: 'Remainder', value: den - excessBlue },
+                    ]);
+                }, 500); // Small delay for the excess chart
+            }
         }, 1600); // Wait for red animation to complete (1000ms) + 600ms delay
         return () => clearTimeout(timer);
     }, [redPieData, firstProductNumerator, secondProductNumerator, commonDenominator]);
@@ -208,6 +236,10 @@ const FractionAddition = () => {
         setCombinedPieData(null);
         setRedPieData(null);
         setBluePieData(null);
+        setExcessBluePieData(null);
+        setShowExcessBlueChart(false);
+        setTranslateSecondElements(false);
+        setShowAdditionPlusSign(false);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -292,17 +324,25 @@ const FractionAddition = () => {
             setHideAddNumeratorsButton(true);
             setFadeMultipliers(true);
             setTimeout(() => {
-                setShowMiddlePieChart(true);
+                // Move second elements next to first elements
+                setTranslateSecondElements(true);
+                // Show plus sign after elements finish moving
                 setTimeout(() => {
-                    const num1 = firstProductNumerator || 0;
-                    const num2 = secondProductNumerator || 0;
-                    const den = commonDenominator || 1;
-                    // Start red animation first
-                    setRedPieData([
-                        { name: 'Numerator 1', value: num1 },
-                        { name: 'Remainder', value: den - num1 },
-                    ]);
-                }, 2000);
+                    setShowAdditionPlusSign(true);
+                }, 800);
+                setTimeout(() => {
+                    setShowMiddlePieChart(true);
+                    setTimeout(() => {
+                        const num1 = firstProductNumerator || 0;
+                        const num2 = secondProductNumerator || 0;
+                        const den = commonDenominator || 1;
+                        // Start red animation first
+                        setRedPieData([
+                            { name: 'Numerator 1', value: num1 },
+                            { name: 'Remainder', value: den - num1 },
+                        ]);
+                    }, 2000);
+                }, 800); // Wait for translation to complete
             }, 500);
         }, 500);
     };
@@ -524,7 +564,10 @@ const FractionAddition = () => {
                         </div>
                     </div>
                     <div className={`text-4xl mt-16 transition-opacity duration-300 ${hidePlusSign ? 'opacity-0' : ''}`}>+</div>
-                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out ${translateFractions ? '-translate-y-20 translate-x-16' : ''}`}>
+                    <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out`} style={{ 
+                        transform: `${translateFractions ? 'translateY(-5rem) translateX(4rem)' : 'translateY(0) translateX(0)'} ${translateSecondElements ? 'translateX(-10.25rem)' : ''}`.trim(),
+                        transition: 'transform 0.8s ease-out' 
+                    }}>
                         <p className={`text-base mb-2 text-center h-10 text-blue-500 ${hideFractionLabels ? 'fade-out-up-animation' : ''}`}>Second Fraction</p>
                         <div className="relative">
                             <Input
@@ -647,7 +690,7 @@ const FractionAddition = () => {
                                 </Pie>
                             </PieChart>
                         </div>
-                        <div className="w-28 h-28" style={{ transform: 'translateX(8px)' }}>
+                        <div className="w-28 h-28" style={{ transform: translateSecondElements ? 'translateX(-8.375rem)' : 'translateX(0px)', transition: 'transform 0.8s ease-out' }}>
                             <PieChart width={112} height={112}>
                                 {/* Fill layer: keeps filled proportion static */}
                                 <Pie
@@ -707,7 +750,7 @@ const FractionAddition = () => {
                         </div>
                     </div>
                     {showMiddlePieChart && (
-                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '3px', left: 'calc(50% - 3.5rem)' }}>
+                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '3px', left: translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)' }}>
                             <PieChart width={112} height={112}>
                                 <Pie
                                     data={[{ value: 1 }]}
@@ -764,6 +807,64 @@ const FractionAddition = () => {
                                     {Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map((_, index) => (
                                         <Cell
                                             key={`middle-pie-cell-${index}`}
+                                            fill="transparent"
+                                            stroke="#000"
+                                            strokeWidth={1}
+                                        />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </div>
+                    )}
+                    
+                    {/* Plus sign between moved fractions */}
+                    {showAdditionPlusSign && (
+                        <div className="absolute fade-in-animation" style={{ top: '-100px', left: 'calc(50% - 5.5rem)', fontSize: '2rem', fontWeight: 'bold' }}>
+                            +
+                        </div>
+                    )}
+                    
+                    {/* Excess blue pie chart - positioned above the middle chart */}
+                    {showExcessBlueChart && excessBluePieData && (
+                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '-120px', left: translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)' }}>
+                            <PieChart width={112} height={112}>
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                >
+                                    <Cell fill="#FFFFFF" stroke="#000" strokeWidth={1} />
+                                </Pie>
+                                <Pie
+                                    data={excessBluePieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    animationDuration={1000}
+                                >
+                                    <Cell fill="#3B82F6" />
+                                    <Cell fill="transparent" />
+                                </Pie>
+                                <Pie
+                                    data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                >
+                                    {Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map((_, index) => (
+                                        <Cell
+                                            key={`excess-pie-cell-${index}`}
                                             fill="transparent"
                                             stroke="#000"
                                             strokeWidth={1}
