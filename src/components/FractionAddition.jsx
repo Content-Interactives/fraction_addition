@@ -592,8 +592,7 @@ const FractionAddition = () => {
                     </div>
                     <div className={`text-4xl mt-16 transition-opacity duration-300 ${hidePlusSign ? 'opacity-0' : ''}`}>+</div>
                     <div className={`flex flex-col items-center w-[4.5rem] transition-transform duration-500 ease-in-out`} style={{ 
-                        transform: `${translateFractions ? 'translateY(-5rem) translateX(4rem)' : 'translateY(0) translateX(0)'} ${translateSecondElements ? 'translateX(-10.25rem)' : ''}`.trim(),
-                        transition: 'transform 0.8s ease-out' 
+                        transform: `${translateFractions ? 'translateY(-5rem) translateX(3.75rem)' : 'translateY(0) translateX(0)'} ${translateSecondElements ? 'translateX(-10.25rem)' : ''}`.trim()
                     }}>
                         <p className={`text-base mb-2 text-center h-10 text-blue-500 ${hideFractionLabels ? 'fade-out-up-animation' : ''}`}>Second Fraction</p>
                         <div className="relative">
