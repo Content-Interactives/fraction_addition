@@ -75,6 +75,8 @@ const FractionAddition = () => {
     const [fadeMultipliers, setFadeMultipliers] = useState(false);
     const [showMiddlePieChart, setShowMiddlePieChart] = useState(false);
     const [combinedPieData, setCombinedPieData] = useState(null);
+    const [redPieData, setRedPieData] = useState(null);
+    const [bluePieData, setBluePieData] = useState(null);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -103,6 +105,23 @@ const FractionAddition = () => {
         }, 800);
         return () => clearTimeout(timer);
     }, [showThumbsUpFlexi]);
+
+    // Sequential pie chart fill animation
+    useEffect(() => {
+        if (!redPieData) return;
+        // After red animation completes, start blue animation
+        const timer = setTimeout(() => {
+            const num1 = firstProductNumerator || 0;
+            const num2 = secondProductNumerator || 0;
+            const den = commonDenominator || 1;
+            setBluePieData([
+                { name: 'Numerator 1', value: num1 },
+                { name: 'Numerator 2', value: num2 },
+                { name: 'Remainder', value: den - num1 - num2 },
+            ]);
+        }, 1600); // Wait for red animation to complete (1000ms) + 600ms delay
+        return () => clearTimeout(timer);
+    }, [redPieData, firstProductNumerator, secondProductNumerator, commonDenominator]);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -187,6 +206,8 @@ const FractionAddition = () => {
         setFirstPieHideSliceLines(false);
         setFirstPieUseCommonDenominator(false);
         setCombinedPieData(null);
+        setRedPieData(null);
+        setBluePieData(null);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -276,10 +297,10 @@ const FractionAddition = () => {
                     const num1 = firstProductNumerator || 0;
                     const num2 = secondProductNumerator || 0;
                     const den = commonDenominator || 1;
-                    setCombinedPieData([
+                    // Start red animation first
+                    setRedPieData([
                         { name: 'Numerator 1', value: num1 },
-                        { name: 'Numerator 2', value: num2 },
-                        { name: 'Remainder', value: den - num1 - num2 },
+                        { name: 'Remainder', value: den - num1 },
                     ]);
                 }, 2000);
             }, 500);
@@ -699,9 +720,24 @@ const FractionAddition = () => {
                                 >
                                     <Cell fill="#FFFFFF" stroke="#000" strokeWidth={1} />
                                 </Pie>
-                                {combinedPieData && (
+                                {redPieData && (
                                     <Pie
-                                        data={combinedPieData}
+                                        data={redPieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={50}
+                                        dataKey="value"
+                                        startAngle={90}
+                                        endAngle={450}
+                                        animationDuration={1000}
+                                    >
+                                        <Cell fill="#EF4444" />
+                                        <Cell fill="transparent" />
+                                    </Pie>
+                                )}
+                                {bluePieData && (
+                                    <Pie
+                                        data={bluePieData}
                                         cx="50%"
                                         cy="50%"
                                         outerRadius={50}
