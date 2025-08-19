@@ -81,6 +81,9 @@ const FractionAddition = () => {
     const [showExcessBlueChart, setShowExcessBlueChart] = useState(false);
     const [translateSecondElements, setTranslateSecondElements] = useState(false);
     const [showAdditionPlusSign, setShowAdditionPlusSign] = useState(false);
+    const [showEqualSign, setShowEqualSign] = useState(false);
+    const [showFractionSum, setShowFractionSum] = useState(false);
+    const [transitionToPurple, setTransitionToPurple] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -150,6 +153,26 @@ const FractionAddition = () => {
         }, 1600); // Wait for red animation to complete (1000ms) + 600ms delay
         return () => clearTimeout(timer);
     }, [redPieData, firstProductNumerator, secondProductNumerator, commonDenominator]);
+
+    // Show fraction sum after pie charts are filled
+    useEffect(() => {
+        if (!bluePieData) return;
+        // Wait 2.5 seconds after blue animation starts, then show fraction sum
+        const timer = setTimeout(() => {
+            setShowFractionSum(true);
+        }, 2500);
+        return () => clearTimeout(timer);
+    }, [bluePieData]);
+
+    // Transition to purple after fraction sum appears
+    useEffect(() => {
+        if (!showFractionSum) return;
+        // Wait 1 second after fraction sum appears, then start purple transition
+        const timer = setTimeout(() => {
+            setTransitionToPurple(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [showFractionSum]);
 
     useEffect(() => {
         const newErrors = [false, false];
@@ -240,6 +263,9 @@ const FractionAddition = () => {
         setShowExcessBlueChart(false);
         setTranslateSecondElements(false);
         setShowAdditionPlusSign(false);
+        setShowEqualSign(false);
+        setShowFractionSum(false);
+        setTransitionToPurple(false);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -326,9 +352,10 @@ const FractionAddition = () => {
             setTimeout(() => {
                 // Move second elements next to first elements
                 setTranslateSecondElements(true);
-                // Show plus sign after elements finish moving
+                // Show plus sign and equal sign after elements finish moving
                 setTimeout(() => {
                     setShowAdditionPlusSign(true);
+                    setShowEqualSign(true);
                 }, 800);
                 setTimeout(() => {
                     setShowMiddlePieChart(true);
@@ -789,8 +816,8 @@ const FractionAddition = () => {
                                         endAngle={450}
                                         animationDuration={1000}
                                     >
-                                        <Cell fill="#EF4444" />
-                                        <Cell fill="#3B82F6" />
+                                        <Cell fill="#EF4444" className={transitionToPurple ? 'red-to-purple-animation' : ''} />
+                                        <Cell fill="#3B82F6" className={transitionToPurple ? 'blue-to-purple-animation' : ''} />
                                         <Cell fill="transparent" />
                                     </Pie>
                                 )}
@@ -819,8 +846,30 @@ const FractionAddition = () => {
                     
                     {/* Plus sign between moved fractions */}
                     {showAdditionPlusSign && (
-                        <div className="absolute fade-in-animation" style={{ top: '-100px', left: 'calc(50% - 5.5rem)', fontSize: '2rem', fontWeight: 'bold' }}>
+                        <div className="absolute fade-in-animation" style={{ top: '-102px', left: 'calc(50% - 5.7rem)', fontSize: '2rem' }}>
                             +
+                        </div>
+                    )}
+                    
+                    {/* Equal sign */}
+                    {showEqualSign && (
+                        <div className="absolute fade-in-animation" style={{ top: '-102px', left: 'calc(50% - 0.3rem)', fontSize: '2rem' }}>
+                            =
+                        </div>
+                    )}
+                    
+                    {/* Fraction sum - positioned to the right of equal sign */}
+                    {showFractionSum && (
+                        <div className="absolute fade-in-animation" style={{ top: '-126px', left: 'calc(50% + 0.625rem)' }}>
+                            <div className="flex flex-col items-center w-[4.5rem]">
+                                <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '2px 16px' }}>
+                                    <p className="text-2xl">{(firstProductNumerator || 0) + (secondProductNumerator || 0)}</p>
+                                </div>
+                                <hr className="w-full border-t-2 border-purple-600" style={{ width: '50%', marginTop: '3px', marginBottom: '3px' }} />
+                                <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '10px 16px' }}>
+                                    <p className="text-2xl">{commonDenominator || 1}</p>
+                                </div>
+                            </div>
                         </div>
                     )}
                     
@@ -848,10 +897,10 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     animationDuration={1000}
-                                >
-                                    <Cell fill="#3B82F6" />
-                                    <Cell fill="transparent" />
-                                </Pie>
+                                                                    >
+                                        <Cell fill="#3B82F6" className={transitionToPurple ? 'blue-to-purple-animation' : ''} />
+                                        <Cell fill="transparent" />
+                                    </Pie>
                                 <Pie
                                     data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
                                     cx="50%"
