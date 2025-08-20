@@ -953,22 +953,6 @@ const FractionAddition = () => {
                                 >
                                     <Cell fill="#FFFFFF" stroke="#000" strokeWidth={1} />
                                 </Pie>
-                                {redPieData && (
-                                    <Pie
-                                        data={redPieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={50}
-                                        dataKey="value"
-                                        startAngle={90}
-                                        endAngle={450}
-                                        animationDuration={1000}
-                                        stroke="none"
-                                    >
-                                        <Cell fill="#EF4444" stroke="none" />
-                                        <Cell fill="transparent" stroke="none" />
-                                    </Pie>
-                                )}
                                 {bluePieData && (
                                     <Pie
                                         data={bluePieData}
@@ -983,6 +967,22 @@ const FractionAddition = () => {
                                     >
                                         <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#EF4444"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
                                         <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
+                                        <Cell fill="#FFFFFF" stroke="none" />
+                                    </Pie>
+                                )}
+                                {redPieData && (
+                                    <Pie
+                                        data={redPieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={50}
+                                        dataKey="value"
+                                        startAngle={90}
+                                        endAngle={450}
+                                        animationDuration={1000}
+                                        stroke="none"
+                                    >
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#EF4444"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
                                         <Cell fill="transparent" stroke="none" />
                                     </Pie>
                                 )}
@@ -1126,7 +1126,7 @@ const FractionAddition = () => {
                                     stroke="none"
                                 >
                                         <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
-                                        <Cell fill="transparent" stroke="none" />
+                                        <Cell fill="#FFFFFF" stroke="none" />
                                     </Pie>
                                 <Pie
                                     data={Array.from({ length: (middlePieUseSimplifiedDenominator ? (isMixedNumber ? parseInt(fractionalDenominator || 0) : parseInt(simplifiedDenominator || 0)) : parseInt(commonDenominator || 0)) || 0 }).map(() => ({ value: 1 }))}
