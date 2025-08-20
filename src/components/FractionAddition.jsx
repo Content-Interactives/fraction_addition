@@ -93,6 +93,7 @@ const FractionAddition = () => {
     const [fadePlusAndEqual, setFadePlusAndEqual] = useState(false);
     const [fadeSimplifyButton, setFadeSimplifyButton] = useState(false);
     const [hideSimplifyButton, setHideSimplifyButton] = useState(false);
+    const [centerElementsAfterSimplify, setCenterElementsAfterSimplify] = useState(false);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
@@ -305,6 +306,7 @@ const FractionAddition = () => {
         setFadePlusAndEqual(false);
         setFadeSimplifyButton(false);
         setHideSimplifyButton(false);
+        setCenterElementsAfterSimplify(false);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
     };
@@ -422,6 +424,8 @@ const FractionAddition = () => {
         // Hide the button after fade completes
         setTimeout(() => {
             setHideSimplifyButton(true);
+            // After elements fade out, center the remaining elements
+            setCenterElementsAfterSimplify(true);
         }, 500);
     };
 
@@ -827,7 +831,12 @@ const FractionAddition = () => {
                         </div>
                     </div>
                     {showMiddlePieChart && (
-                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '3px', left: translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)' }}>
+                        <div className={`absolute w-28 h-28 fade-in-animation ${centerElementsAfterSimplify ? 'transition-all duration-500 ease-in-out' : ''}`} style={{ 
+                            top: '3px', 
+                            left: centerElementsAfterSimplify 
+                                ? (showExcessBlueChart ? 'calc(50% - 6rem - 20px)' : 'calc(50% - 3.5rem)')
+                                : (translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)')
+                        }}>
                             <PieChart width={112} height={112}>
                                 <Pie
                                     data={[{ value: 1 }]}
@@ -910,7 +919,10 @@ const FractionAddition = () => {
                     
                     {/* Fraction sum - positioned to the right of equal sign */}
                     {showFractionSum && (
-                        <div className="absolute fade-in-animation" style={{ top: '-126px', left: 'calc(50% + 0.625rem)' }}>
+                        <div className={`absolute fade-in-animation ${centerElementsAfterSimplify ? 'transition-all duration-500 ease-in-out' : ''}`} style={{ 
+                            top: '-126px', 
+                            left: centerElementsAfterSimplify ? 'calc(50% - 2.25rem)' : 'calc(50% + 0.625rem)'
+                        }}>
                             <div className="flex flex-col items-center w-[4.5rem]">
                                 <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '2px 16px' }}>
                                     <p className="text-2xl">{(firstProductNumerator || 0) + (secondProductNumerator || 0)}</p>
@@ -925,7 +937,12 @@ const FractionAddition = () => {
                     
                     {/* Excess blue pie chart - positioned above the middle chart */}
                     {showExcessBlueChart && excessBluePieData && (
-                        <div className="absolute w-28 h-28 fade-in-animation" style={{ top: '-120px', left: translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)' }}>
+                        <div className={`absolute w-28 h-28 fade-in-animation ${centerElementsAfterSimplify ? 'transition-all duration-500 ease-in-out' : ''}`} style={{ 
+                            top: centerElementsAfterSimplify ? '3px' : '-120px', 
+                            left: centerElementsAfterSimplify 
+                                ? 'calc(50% + 1.5rem - 20px)'
+                                : (translateSecondElements ? 'calc(50% + 4.625rem)' : 'calc(50% - 3.5rem)')
+                        }}>
                             <PieChart width={112} height={112}>
                                 <Pie
                                     data={[{ value: 1 }]}
