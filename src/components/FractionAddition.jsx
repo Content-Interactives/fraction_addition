@@ -7,6 +7,7 @@ import { PieChart, Pie, Cell } from 'recharts';
 import FlexiWave from '../assets/All Flexi Poses/SVG/Flexi_Wave.svg';
 import FlexiTeacher from '../assets/All Flexi Poses/SVG/Flexi_Teacher.svg';
 import FlexiThumbsUp from '../assets/All Flexi Poses/SVG/Flexi_ThumbsUp.svg';
+import FlexiStars from '../assets/All Flexi Poses/SVG/Flexi_Stars.svg';
 import './ui/reused-animations/width.css';
 import './ui/reused-animations/fade.css';
 
@@ -87,6 +88,9 @@ const FractionAddition = () => {
     const [showFinalFlexi, setShowFinalFlexi] = useState(false);
     const [fadeThumbsUpFlexi, setFadeThumbsUpFlexi] = useState(false);
     const [hideThumbsUpFlexi, setHideThumbsUpFlexi] = useState(false);
+    const [fadeFinalFlexi, setFadeFinalFlexi] = useState(false);
+    const [hideFinalFlexi, setHideFinalFlexi] = useState(false);
+    const [showStarsFlexiAfterSimplify, setShowStarsFlexiAfterSimplify] = useState(false);
     const [showSimplifyButton, setShowSimplifyButton] = useState(false);
     const [fadeFirstElements, setFadeFirstElements] = useState(false);
     const [fadeSecondElements, setFadeSecondElements] = useState(false);
@@ -94,12 +98,23 @@ const FractionAddition = () => {
     const [fadeSimplifyButton, setFadeSimplifyButton] = useState(false);
     const [hideSimplifyButton, setHideSimplifyButton] = useState(false);
     const [centerElementsAfterSimplify, setCenterElementsAfterSimplify] = useState(false);
+    const [fadeOriginalSum, setFadeOriginalSum] = useState(false);
+    const [showSimplifiedSum, setShowSimplifiedSum] = useState(false);
+    const [highlightSum, setHighlightSum] = useState(false);
+    const [simplifiedNumerator, setSimplifiedNumerator] = useState(null);
+    const [simplifiedDenominator, setSimplifiedDenominator] = useState(null);
+    const [isMixedNumber, setIsMixedNumber] = useState(false);
+    const [wholePart, setWholePart] = useState(null);
+    const [fractionalNumerator, setFractionalNumerator] = useState(null);
+    const [fractionalDenominator, setFractionalDenominator] = useState(null);
     // First pie re-slice sequence controls
     const [firstPieHideSliceLines, setFirstPieHideSliceLines] = useState(false);
     const [firstPieUseCommonDenominator, setFirstPieUseCommonDenominator] = useState(false);
     // Second pie re-slice sequence controls
     const [secondPieHideSliceLines, setSecondPieHideSliceLines] = useState(false);
     const [secondPieUseCommonDenominator, setSecondPieUseCommonDenominator] = useState(false);
+    // Middle pie re-slice sequence controls (for simplification)
+    const [middlePieUseSimplifiedDenominator, setMiddlePieUseSimplifiedDenominator] = useState(false);
 
     useEffect(() => {
         if (!secondPieUseCommonDenominator) return;
@@ -205,6 +220,80 @@ const FractionAddition = () => {
         return () => clearTimeout(timer);
     }, [showFinalFlexi]);
 
+    // Simplify fraction after centering completes
+    useEffect(() => {
+        if (!centerElementsAfterSimplify) return;
+        
+        const timer = setTimeout(() => {
+            const totalNumerator = (firstProductNumerator || 0) + (secondProductNumerator || 0);
+            const totalDenominator = commonDenominator || 1;
+            const gcd = greatestCommonDivisor(totalNumerator, totalDenominator);
+            
+            const simplifiedNum = totalNumerator / gcd;
+            const simplifiedDen = totalDenominator / gcd;
+            
+            // Check if the fraction is already in simplest form and proper
+            if (simplifiedNum === totalNumerator && simplifiedDen === totalDenominator && simplifiedNum < simplifiedDen) {
+                // Already simplified and proper - just highlight
+                setHighlightSum(true);
+                // Switch to simplified denominator immediately when highlighting
+                setMiddlePieUseSimplifiedDenominator(true);
+                // Fade out final flexi then show stars flexi
+                setTimeout(() => {
+                    setFadeFinalFlexi(true);
+                    setTimeout(() => {
+                        setHideFinalFlexi(true);
+                        setShowStarsFlexiAfterSimplify(true);
+                    }, 500);
+                }, 1000);
+            } else {
+                // Check if the simplified fraction is improper (should be converted to mixed number)
+                if (simplifiedNum >= simplifiedDen) {
+                    // Convert to mixed number
+                    const whole = Math.floor(simplifiedNum / simplifiedDen);
+                    const remainderNum = simplifiedNum % simplifiedDen;
+                    
+                    if (remainderNum === 0) {
+                        // It's a whole number
+                        setWholePart(whole);
+                        setIsMixedNumber(true);
+                        setFractionalNumerator(null);
+                        setFractionalDenominator(null);
+                    } else {
+                        // It's a mixed number
+                        setWholePart(whole);
+                        setFractionalNumerator(remainderNum);
+                        setFractionalDenominator(simplifiedDen);
+                        setIsMixedNumber(true);
+                    }
+                } else {
+                    // Regular proper fraction
+                    setSimplifiedNumerator(simplifiedNum);
+                    setSimplifiedDenominator(simplifiedDen);
+                    setIsMixedNumber(false);
+                }
+                
+                // Fade out original and show simplified
+                setFadeOriginalSum(true);
+                setTimeout(() => {
+                    setShowSimplifiedSum(true);
+                    // Switch to simplified denominator during simplified fraction fade-in
+                    setMiddlePieUseSimplifiedDenominator(true);
+                    // Fade out final flexi then show stars flexi
+                    setTimeout(() => {
+                        setFadeFinalFlexi(true);
+                        setTimeout(() => {
+                            setHideFinalFlexi(true);
+                            setShowStarsFlexiAfterSimplify(true);
+                        }, 500);
+                    }, 1000);
+                }, 500); // Wait for fade out to complete
+            }
+        }, 600); // Wait for centering animation to complete (500ms) + small delay
+        
+        return () => clearTimeout(timer);
+    }, [centerElementsAfterSimplify, firstProductNumerator, secondProductNumerator, commonDenominator]);
+
     useEffect(() => {
         const newErrors = [false, false];
         for (let i = 0; i < 2; i++) {
@@ -300,6 +389,9 @@ const FractionAddition = () => {
         setShowFinalFlexi(false);
         setFadeThumbsUpFlexi(false);
         setHideThumbsUpFlexi(false);
+        setFadeFinalFlexi(false);
+        setHideFinalFlexi(false);
+        setShowStarsFlexiAfterSimplify(false);
         setShowSimplifyButton(false);
         setFadeFirstElements(false);
         setFadeSecondElements(false);
@@ -307,8 +399,18 @@ const FractionAddition = () => {
         setFadeSimplifyButton(false);
         setHideSimplifyButton(false);
         setCenterElementsAfterSimplify(false);
+        setFadeOriginalSum(false);
+        setShowSimplifiedSum(false);
+        setHighlightSum(false);
+        setSimplifiedNumerator(null);
+        setSimplifiedDenominator(null);
+        setIsMixedNumber(false);
+        setWholePart(null);
+        setFractionalNumerator(null);
+        setFractionalDenominator(null);
         setSecondPieHideSliceLines(false);
         setSecondPieUseCommonDenominator(false);
+        setMiddlePieUseSimplifiedDenominator(false);
     };
 
     // After common denominator bubble appears, fade in the Adjust Fractions button
@@ -766,6 +868,7 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     fill="transparent"
+                                    isAnimationActive={false}
                                 >
                                     <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                                 </Pie>
@@ -824,6 +927,7 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     fill="transparent"
+                                    isAnimationActive={false}
                                 >
                                     <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                                 </Pie>
@@ -859,9 +963,10 @@ const FractionAddition = () => {
                                         startAngle={90}
                                         endAngle={450}
                                         animationDuration={1000}
+                                        stroke="none"
                                     >
-                                        <Cell fill="#EF4444" />
-                                        <Cell fill="transparent" />
+                                        <Cell fill="#EF4444" stroke="none" />
+                                        <Cell fill="transparent" stroke="none" />
                                     </Pie>
                                 )}
                                 {bluePieData && (
@@ -874,14 +979,15 @@ const FractionAddition = () => {
                                         startAngle={90}
                                         endAngle={450}
                                         animationDuration={1000}
+                                        stroke="none"
                                     >
-                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#EF4444"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
-                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
-                                        <Cell fill="transparent" />
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#EF4444"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
+                                        <Cell fill="transparent" stroke="none" />
                                     </Pie>
                                 )}
                                 <Pie
-                                    data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
+                                    data={Array.from({ length: (middlePieUseSimplifiedDenominator ? (isMixedNumber ? parseInt(fractionalDenominator || 0) : parseInt(simplifiedDenominator || 0)) : parseInt(commonDenominator || 0)) || 0 }).map(() => ({ value: 1 }))}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={50}
@@ -889,8 +995,9 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     fill="transparent"
+                                    isAnimationActive={false}
                                 >
-                                    {Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map((_, index) => (
+                                    {Array.from({ length: (middlePieUseSimplifiedDenominator ? (isMixedNumber ? parseInt(fractionalDenominator || 0) : parseInt(simplifiedDenominator || 0)) : parseInt(commonDenominator || 0)) || 0 }).map((_, index) => (
                                         <Cell
                                             key={`middle-pie-cell-${index}`}
                                             fill="transparent"
@@ -898,6 +1005,20 @@ const FractionAddition = () => {
                                             strokeWidth={1}
                                         />
                                     ))}
+                                </Pie>
+                                {/* Border ring: always keep the outer circle border visible */}
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                    isAnimationActive={false}
+                                >
+                                    <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                                 </Pie>
                             </PieChart>
                         </div>
@@ -917,21 +1038,59 @@ const FractionAddition = () => {
                         </div>
                     )}
                     
-                    {/* Fraction sum - positioned to the right of equal sign */}
-                    {showFractionSum && (
-                        <div className={`absolute fade-in-animation ${centerElementsAfterSimplify ? 'transition-all duration-500 ease-in-out' : ''}`} style={{ 
+                    {/* Original Fraction sum */}
+                    {showFractionSum && !showSimplifiedSum && (
+                        <div className={`absolute fade-in-animation ${centerElementsAfterSimplify ? 'transition-all duration-500 ease-in-out' : ''} ${fadeOriginalSum ? 'fade-out-animation' : ''} ${highlightSum ? 'animate-pulse' : ''}`} style={{ 
                             top: '-126px', 
-                            left: centerElementsAfterSimplify ? 'calc(50% - 2.25rem)' : 'calc(50% + 0.625rem)'
+                            left: centerElementsAfterSimplify ? 'calc(50% - 2.25rem)' : 'calc(50% + 0.625rem)',
+                            filter: highlightSum ? 'drop-shadow(0 0 8px #8B5CF6)' : 'none'
                         }}>
                             <div className="flex flex-col items-center w-[4.5rem]">
                                 <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '2px 16px' }}>
-                                    <p className="text-2xl">{(firstProductNumerator || 0) + (secondProductNumerator || 0)}</p>
+                                    <p className={`text-2xl ${highlightSum ? 'text-purple-600' : ''}`}>{(firstProductNumerator || 0) + (secondProductNumerator || 0)}</p>
                                 </div>
-                                <hr className="w-full border-t-2 border-purple-600" style={{ width: '50%', marginTop: '3px', marginBottom: '3px' }} />
+                                <hr className={`w-full border-t-2 ${highlightSum ? 'border-purple-600' : 'border-purple-600'}`} style={{ width: '50%', marginTop: '3px', marginBottom: '3px' }} />
                                 <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '10px 16px' }}>
-                                    <p className="text-2xl">{commonDenominator || 1}</p>
+                                    <p className={`text-2xl ${highlightSum ? 'text-purple-600' : ''}`}>{commonDenominator || 1}</p>
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Simplified Fraction/Mixed Number sum */}
+                    {showSimplifiedSum && (
+                        <div className="absolute fade-in-animation" style={{ 
+                            top: '-126px', 
+                            left: isMixedNumber ? 'calc(50% - 4rem + 10px)' : 'calc(50% - 2.25rem)'
+                        }}>
+                            {isMixedNumber ? (
+                                // Mixed number or whole number display
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-2xl text-purple-600">{wholePart}</p>
+                                    {fractionalNumerator && fractionalDenominator && (
+                                        <div className="flex flex-col items-center w-[4.5rem]">
+                                            <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '2px 16px' }}>
+                                                <p className="text-2xl text-purple-600">{fractionalNumerator}</p>
+                                            </div>
+                                            <hr className="w-full border-t-2 border-purple-600" style={{ width: '50%', marginTop: '3px', marginBottom: '3px' }} />
+                                            <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '10px 16px' }}>
+                                                <p className="text-2xl text-purple-600">{fractionalDenominator}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                // Regular proper fraction display
+                                <div className="flex flex-col items-center w-[4.5rem]">
+                                    <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '2px 16px' }}>
+                                        <p className="text-2xl text-purple-600">{simplifiedNumerator}</p>
+                                    </div>
+                                    <hr className="w-full border-t-2 border-purple-600" style={{ width: '50%', marginTop: '3px', marginBottom: '3px' }} />
+                                    <div className="relative flex items-center justify-center text-center" style={{ height: '48px', padding: '10px 16px' }}>
+                                        <p className="text-2xl text-purple-600">{simplifiedDenominator}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                     
@@ -964,12 +1123,13 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     animationDuration={1000}
-                                                                    >
-                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
-                                        <Cell fill="transparent" />
+                                    stroke="none"
+                                >
+                                        <Cell fill={simplePurpleTransition ? "#8B5CF6" : "#3B82F6"} stroke="none" style={{ transition: simplePurpleTransition ? 'fill 2s ease-in-out' : 'none' }} />
+                                        <Cell fill="transparent" stroke="none" />
                                     </Pie>
                                 <Pie
-                                    data={Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map(() => ({ value: 1 }))}
+                                    data={Array.from({ length: (middlePieUseSimplifiedDenominator ? (isMixedNumber ? parseInt(fractionalDenominator || 0) : parseInt(simplifiedDenominator || 0)) : parseInt(commonDenominator || 0)) || 0 }).map(() => ({ value: 1 }))}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={50}
@@ -977,8 +1137,9 @@ const FractionAddition = () => {
                                     startAngle={90}
                                     endAngle={450}
                                     fill="transparent"
+                                    isAnimationActive={false}
                                 >
-                                    {Array.from({ length: parseInt(commonDenominator || 0) || 0 }).map((_, index) => (
+                                    {Array.from({ length: (middlePieUseSimplifiedDenominator ? (isMixedNumber ? parseInt(fractionalDenominator || 0) : parseInt(simplifiedDenominator || 0)) : parseInt(commonDenominator || 0)) || 0 }).map((_, index) => (
                                         <Cell
                                             key={`excess-pie-cell-${index}`}
                                             fill="transparent"
@@ -986,6 +1147,20 @@ const FractionAddition = () => {
                                             strokeWidth={1}
                                         />
                                     ))}
+                                </Pie>
+                                {/* Border ring: always keep the outer circle border visible */}
+                                <Pie
+                                    data={[{ value: 1 }]}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={50}
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    fill="transparent"
+                                    isAnimationActive={false}
+                                >
+                                    <Cell fill="transparent" stroke="#000" strokeWidth={1} />
                                 </Pie>
                             </PieChart>
                         </div>
@@ -1012,9 +1187,14 @@ const FractionAddition = () => {
                     Nice, now it's time to add the numerators!
                 </FlexiText>
             )}
-            {showFinalFlexi && (
-                <FlexiText flexiImage={FlexiThumbsUp} className="fade-in-up-animation">
+            {showFinalFlexi && !hideFinalFlexi && (
+                <FlexiText flexiImage={FlexiThumbsUp} className={`${fadeFinalFlexi ? 'fade-out-up-animation' : 'fade-in-up-animation'}`}>
                     Awesome, now all we need to do is to simplify!
+                </FlexiText>
+            )}
+            {showStarsFlexiAfterSimplify && (
+                <FlexiText flexiImage={FlexiStars} className="fade-in-up-animation">
+                    It's simplified!
                 </FlexiText>
             )}
             {showAdjustButton && !hideAdjustButton && (
