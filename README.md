@@ -1,42 +1,31 @@
-# Fraction Addition Interactive
+# Fraction Addition
 
-This repository contains the code for the **Fraction Addition Interactive**, designed to help students explore and understand how to add fractions with like and unlike denominators using engaging visuals and instant feedback.
+React SPA for visualizing fraction addition (like and unlike denominators). Vite, Tailwind, and chart libraries; output hosted on GitHub Pages.
 
----
+**Live:** https://content-interactives.github.io/fraction_addition/
 
-## 🔗 Live Interactive
+**Curriculum and standards:** [Standards.md](Standards.md)
 
-Try it out here:  
-👉 https://content-interactives.github.io/fraction_addition/
+## Stack
 
----
+- React 19, Vite 7, JavaScript (JSX)
+- Tailwind CSS 3
+- `recharts`, `react-minimal-pie-chart` for visuals
 
-## 🌐 Where This Interactive Is Being Used
+## Scripts
 
-This interactive is currently featured in the following locations:
+| Command | Purpose |
+|--------|---------|
+| `npm run dev` | Dev server |
+| `npm run build` | Build → `dist/` |
+| `npm run preview` | Preview `dist/` |
+| `npm run lint` | ESLint |
+| `npm run deploy` | Build + `gh-pages -d dist` |
 
-- <img width="20" height="20" alt="image" src="https://github.com/user-attachments/assets/5d12571f-8e12-4441-98ab-c0bc94069a96" /> **CK-12 Intent Response**  
-  - 👉 PRODUCTION: [PENDING]  
-  - 👉 MASTER: [PENDING]
-- 📘 **CK-12 Flexbooks**
-  - 👉 [PENDING: Book/lesson link where this interactive appears]
+## Configuration
 
----
+`vite.config.js`: `base: '/fraction_addition/'` for GitHub Pages.
 
-## 📚 Standards & Subjects
+## Layout
 
-This interactive aligns with the following topics and standards:
-
-- **📂 Subject Area**: Middle School Math (Grades 5–6)  
-- **🧮 Topic**: Fraction Addition (like and unlike denominators)  
-- **📏 Common Core**:  
-  5.NF.A.1 – Add and subtract fractions with unlike denominators (including mixed numbers)  
-  5.NF.A.2 – Solve word problems involving addition and subtraction of fractions  
-
----
-
-## 🛠️ Developer Notes
-
-- Built with: HTML, CSS, JavaScript  
-- Deployed via GitHub Pages  
-- See `index.html` and supporting assets in `js/` and `css/` folders
+`src/main.jsx` → `App.jsx` and fraction UI under `src/`.
